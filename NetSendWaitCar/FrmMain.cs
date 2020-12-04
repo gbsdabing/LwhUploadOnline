@@ -476,20 +476,25 @@ namespace NetSendWaitCar
                     return;
                 }
 
-                if (ckQGLC.Checked && waitCarInfoGua != null && waitCarInfoGua.IsReadyToTest)
+                if (ckQGLC.Checked)
                 {
-                    waitCarInfoGua.SFJCCKG = ckLWH_g.Checked ? "Y" : "N";
-                    waitCarInfoGua.SFJCLBGD = ckLB_g.Checked ? "Y" : "N";
-                    waitCarInfoGua.SFJCHX = ckHX_g.Checked ? "Y" : "N";
-                    waitCarInfoGua.SFJCZJ = ckZJ_g.Checked ? "Y" : "N";
-                    waitCarInfoGua.SFJCZBZL = ckZBZL_g.Checked ? "Y" : "N";
+                    if (waitCarInfoGua != null && waitCarInfoGua.IsReadyToTest)
+                    {
+                        waitCarInfoGua.SFJCCKG = ckLWH_g.Checked ? "Y" : "N";
+                        waitCarInfoGua.SFJCLBGD = ckLB_g.Checked ? "Y" : "N";
+                        waitCarInfoGua.SFJCHX = ckHX_g.Checked ? "Y" : "N";
+                        waitCarInfoGua.SFJCZJ = ckZJ_g.Checked ? "Y" : "N";
+                        waitCarInfoGua.SFJCZBZL = ckZBZL_g.Checked ? "Y" : "N";
+                    }
+                    else
+                    {
+                        //牵挂联测时挂车信息为空，不能开始检测
+                        MessageBox.Show("挂车辆信息为空或不全，不能进行牵挂联测！");
+                        return;
+                    }
                 }
                 else
-                {
-                    //牵挂联测时挂车信息为空，不能开始检测
-                    MessageBox.Show("挂车辆信息为空或不全，不能进行牵挂联测！");
-                    return;
-                }
+                    waitCarInfoGua = null;
 
                 //生成待检车辆信息
                 if (CreateWaitCarInfoFile())
