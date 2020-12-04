@@ -1514,6 +1514,8 @@ namespace NetSendWaitCar
                     IOControl.WritePrivateProfileString("检测信息", "整备质量", waitCarInfoZhu.ZBZL.ToString(), CarInfoPathTemp);
                     IOControl.WritePrivateProfileString("检测信息", "实测整备质量", waitCarInfoZhu.SCZBZL.ToString(), CarInfoPathTemp);
                     IOControl.WritePrivateProfileString("检测信息", "最大总质量", waitCarInfoZhu.ZDZZL.ToString(), CarInfoPathTemp);
+
+                    IOControl.WritePrivateProfileString("检测信息", "DaLeiJCFS", daleijcfs, CarInfoPathTemp);
                     #endregion
 
                     #region 再写挂车信息
