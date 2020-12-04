@@ -97,9 +97,9 @@ namespace LwhUploadOnline
                         //待检列表未选择大雷联网，继续初始化大雷接口
                         dl_interface = new DaLei(softConfig.Jkdz);
                         dt_time = dl_interface.GetSystemDatetime(softConfig.StationID);
+                        interface_status = true;
                         if (dt_time != null && dt_time.Rows.Count > 0)
                         {
-                            interface_status = true;
                             code = "1";
                             if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())))
                                 message = "接口初始化成功";
@@ -107,7 +107,7 @@ namespace LwhUploadOnline
                                 message = "接口初始化成功、同步本地时间失败";
                         }
                         else
-                        {
+                        { 
                             code = "-6";
                             message = "接口初始化获取平台时间失败";
                         }
