@@ -153,7 +153,6 @@ namespace NetSendWaitCar
                 else
                 {
                     UpdateRtb("同步待检车辆平台时间失败");
-                    return;
                 }
 
                 btGetWaitInfo.Enabled = true;
@@ -234,7 +233,6 @@ namespace NetSendWaitCar
                             else
                             {
                                 UpdateRtb("同步上传平台时间失败");
-                                return;
                             }
                         }
                         #endregion
@@ -447,9 +445,8 @@ namespace NetSendWaitCar
                         return;
                 }
 
-                #region 更新待检车辆信息
-                waitCarInfoZhu = UpdateWaitCarInfo(dtWaitCarList.Rows[0]);
-                #endregion
+                waitCarInfoZhu = UpdateWaitCarInfo(dtWaitCarList.Rows[0]);//更新待检车辆信息
+                btSendToTest.Enabled = true;
                 #endregion
             }
         }
@@ -496,7 +493,10 @@ namespace NetSendWaitCar
 
                 //生成待检车辆信息
                 if (CreateWaitCarInfoFile())
+                {
                     MessageBox.Show("发车上线成功！");
+                    btSendToTest.Enabled = false;
+                }
                 else
                     UpdateRtb("发车生成待检车辆文件失败！");
             }
@@ -573,6 +573,7 @@ namespace NetSendWaitCar
 
                             if (waitCarInfoZhu != null)
                             {
+                                btSendToTest.Enabled = true;
                                 waitCarInfoZhu.IsReadyToTest = true;//待检车辆信息更新完成，可以进行检测
                                 UpdateRtb("待检车辆信息(主车)已获取且准备好下发检测软件");
                             }
@@ -606,6 +607,7 @@ namespace NetSendWaitCar
 
                             if (waitCarInfoZhu != null)
                             {
+                                btSendToTest.Enabled = true;
                                 waitCarInfoZhu.IsReadyToTest = true;//待检车辆信息更新完成，可以进行检测
                                 UpdateRtb("待检车辆信息已获取且准备好下发检测软件");
                             }
