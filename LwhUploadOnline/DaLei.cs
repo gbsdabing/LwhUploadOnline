@@ -205,7 +205,7 @@ namespace LwhUploadOnline
 
                 XmlElement xe123 = xmldoc.CreateElement("zbzlpd");
                 XmlElement xe133 = xmldoc.CreateElement("zbzlabswcpd");
-                XmlElement xe134 = xmldoc.CreateElement("bzlrelwcpd");
+                XmlElement xe134 = xmldoc.CreateElement("zbzlrelwcpd");
                 if (model.ZBZLBJ)
                 {
                     xe123.InnerText = model.ZBZLPD == "不合格" ? "2" : "1";

@@ -25,7 +25,7 @@ namespace NetSendWaitCar
             }
             catch (Exception er)
             {
-                IOControl.WriteLogs("SetSystemDateTime函数执行异常" + er.Message);
+                LwhUploadOnline.IOControl.WriteLogs("SetSystemDateTime函数执行异常" + er.Message);
             }
 
             return flag;

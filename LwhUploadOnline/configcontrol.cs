@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace NetLink
+namespace LwhUploadOnline
 {
-    public class Config
+    public class configControl
     {
         #region INI读取引用
         /// <summary>
@@ -83,14 +83,14 @@ namespace NetLink
 
                 GetPrivateProfileString("联网配置", "接口地址", "", temp, 2048, config_path);
                 config.Jkdz = temp.ToString().Trim();
-                
+
                 GetPrivateProfileString("联网配置", "接口序列号", "", temp, 2048, config_path);
                 config.Jkxlh = temp.ToString().Trim();
 
                 GetPrivateProfileString("联网配置", "本机IP地址", "", temp, 2048, config_path);
                 config.LocalIP = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "系统类别", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "系统类别", "18", temp, 2048, config_path);
                 config.Xtlb = temp.ToString().Trim();
 
                 GetPrivateProfileString("联网配置", "检测站编号", "", temp, 2048, config_path);
@@ -99,25 +99,25 @@ namespace NetLink
                 GetPrivateProfileString("联网配置", "检测线编号", "", temp, 2048, config_path);
                 config.LineID = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "外廓工位号", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "外廓工位号", "1", temp, 2048, config_path);
                 config.WkDeviceID = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "整备质量工位号", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "整备质量工位号", "1", temp, 2048, config_path);
                 config.ZbzlDeviceID = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "外廓前照编号", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "外廓前照编号", "360", temp, 2048, config_path);
                 config.WkFrontPicBh = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "外廓后照编号", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "外廓后照编号", "361", temp, 2048, config_path);
                 config.WkBackPicBh = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "整备质量前照编号", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "整备质量前照编号", "362", temp, 2048, config_path);
                 config.ZbzlFrontPicBh = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "整备质量后照编号", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "整备质量后照编号", "363", temp, 2048, config_path);
                 config.ZbzlBackPicBh = temp.ToString().Trim();
 
-                GetPrivateProfileString("联网配置", "照片上传次数", "", temp, 2048, config_path);
+                GetPrivateProfileString("联网配置", "照片上传次数", "1", temp, 2048, config_path);
                 if (int.TryParse(temp.ToString().Trim(), out i) && i > 0)
                     config.PicSendTimes = i;
                 else
@@ -145,6 +145,10 @@ namespace NetLink
                 config.WKDH = temp.ToString().Trim();
                 GetPrivateProfileString("联网配置", "整备质量代号", "Z1", temp, 2048, config_path);
                 config.ZBZLDH = temp.ToString().Trim();
+                GetPrivateProfileString("联网配置", "大雷是否发送18JXX", "N", temp, 2048, config_path);
+                config.dl_Send18Jxx = temp.ToString().Trim()=="Y";
+                GetPrivateProfileString("联网配置", "大雷是否发送18H05", "N", temp, 2048, config_path);
+                config.dl_Send18H05 = temp.ToString().Trim()=="Y";
                 return config;
             }
             catch (Exception er)
@@ -204,10 +208,13 @@ namespace NetLink
                 WritePrivateProfileString("联网配置", "接口序列号", config.Jkxlh, config_path);
                 WritePrivateProfileString("联网配置", "接口地址", config.Jkdz, config_path);
 
+                WritePrivateProfileString("联网配置", "大雷是否发送18JXX", config.dl_Send18Jxx?"Y":"N", config_path);
+                WritePrivateProfileString("联网配置", "大雷是否发送18H05", config.dl_Send18H05 ? "Y" : "N", config_path);
+
                 WritePrivateProfileString("联网配置", "联网地区", ((int)config.NetArea).ToString(), config_path);
 
                 WritePrivateProfileString("联网配置", "照片上传次数", config.PicSendTimes.ToString(), config_path);
-                
+
                 return true;
             }
             catch (Exception er)
@@ -250,7 +257,7 @@ namespace NetLink
                 return false;
             }
         }
-        
+
         /// <summary>
         /// 创建文件夹
         /// </summary>
@@ -366,7 +373,7 @@ namespace NetLink
         /// 待检车辆来源
         /// </summary>
         public NetWaitCarModel WaitCarModel { get; set; }
-        
+
         /// <summary>
         /// 联网上传接口地址1
         /// </summary>
@@ -377,7 +384,7 @@ namespace NetLink
         /// </summary>
         public string JkxlhWaitCar { get; set; }
 
-        
+
         /// <summary>
         /// 联网上传模式
         /// </summary>
@@ -392,7 +399,7 @@ namespace NetLink
         /// 联网上传接口地址
         /// </summary>
         public string Jkdz { get; set; }
-        
+
         /// <summary>
         /// 本机IP地址
         /// </summary>
@@ -484,5 +491,7 @@ namespace NetLink
         public string ZDBS { get; set; }
         public string WKDH { set; get; }
         public string ZBZLDH { set; get; }
+        public bool dl_Send18Jxx { set; get; }
+        public bool dl_Send18H05 { set; get; }
     }
 }

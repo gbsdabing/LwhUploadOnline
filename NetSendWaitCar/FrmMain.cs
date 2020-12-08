@@ -7,21 +7,41 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 
 namespace NetSendWaitCar
 {
     public partial class FrmMain : Form
     {
+        #region 联网接口定义
+        private LwhUploadOnline.AnChe ac_interface = null;
+        private LwhUploadOnline.BaoHui bh_interface = null;
+        private LwhUploadOnline.DaLei dl_interface = null;
+        private LwhUploadOnline.GongAn ga_interface = null;
+        private LwhUploadOnline.HaiCheng hc_interface = null;
+        private LwhUploadOnline.HaiChengOld hc_interface_old = null;
+        private LwhUploadOnline.GuangXi gx_interface = null;
+        private LwhUploadOnline.HuaYan hy_interface = null;
+        private LwhUploadOnline.HuBei hb_interface = null;
+        private LwhUploadOnline.KangShiBai ksb_interface = null;
+        private LwhUploadOnline.ShangRao ss_interface = null;
+        private LwhUploadOnline.ShiShang njss_interface = null;
+        private LwhUploadOnline.WanGuo wg_interface = null;
+        private LwhUploadOnline.WeiKe wk_interface = null;
+        private LwhUploadOnline.XinDun xd_interface = null;
+        private LwhUploadOnline.YiZhongXiang yzx_interface = null;
+        private LwhUploadOnline.XinLiYuan xly_interface = null;
+        private LwhUploadOnline.ZhongHang zh_interface = null;
+        #endregion
+
         private string global_path = @"D:\外廓数据文件";
         /// <summary>
         /// 联网配置信息
         /// </summary>
-        private UploadConfigModel softConfig = new UploadConfigModel();
+        private LwhUploadOnline.UploadConfigModel softConfig = new LwhUploadOnline.UploadConfigModel();
         /// <summary>
         /// 待检车辆列表
         /// </summary>
-        private DataTable dtWaitCarList = null;
+        private List<WaitCarModel> WaitCarList = new List<WaitCarModel>();
         /// <summary>
         /// 主车待检车辆信息
         /// </summary>
@@ -35,1125 +55,217 @@ namespace NetSendWaitCar
         /// </summary>
         private string daleijcfs = "1";
 
+        private DataTable dtDgvSource = null;
+
         /// <summary>
         /// 检测程序用待检车辆信息
         /// </summary>
         private string CarInfoPath = @"C:\jcdatatxt\carinfo.ini";
         private string CarInfoPathTemp = @"C:\jcdatatxt\carinfo_temp.ini";
 
-        #region 委托更新界面信息
-        //更新RTB信息
-        private delegate void DgUpdateRtb(string msg);
-        private void UpdateRtb(string msg)
-        {
-            try
-            {
-                BeginInvoke(new DgUpdateRtb(update_rtb), msg);
-            }
-            catch { }
-        }
-        private void update_rtb(string msg)
-        {
-            if (rtbRunLogs.Text.Length > 5000)
-                rtbRunLogs.Text = rtbRunLogs.Text.Remove(0, 2000);
-            rtbRunLogs.AppendText(msg + "\r\n");
-            rtbRunLogs.Select(rtbRunLogs.TextLength, 0);
-            rtbRunLogs.ScrollToCaret();
-        }
-
-        //更新控件是否Enable状态
-        private delegate void DgCCE(Control c, bool is_active);
-        private void ChangeControlEnable(Control c, bool is_active)
-        {
-            BeginInvoke(new DgCCE(change_control_enable), c, is_active);
-        }
-        private void change_control_enable(Control c, bool is_active)
-        {
-            try
-            {
-                c.Enabled = is_active;
-            }
-            catch { }
-        }
-
-        //更新控件显示名称
-        private delegate void DgUpdateText(Control c, string txt);
-        private void UpdateText(Control c, string txt)
-        {
-            BeginInvoke(new DgUpdateText(update_text), c, txt);
-        }
-        private void update_text(Control c, string txt)
-        {
-            try
-            {
-                c.Text = txt;
-            }
-            catch { }
-        }
-        #endregion
-
-        #region 联网接口定义
-        private AnChe ac_interface = null;
-        private BaoHui bh_interface = null;
-        private DaLei dl_interface = null;
-        private GongAn ga_interface = null;
-        private HaiCheng hc_interface = null;
-        private HaiChengOld hc_interface_old = null;
-        private GuangXi gx_interface = null;
-        private HuaYan hy_interface = null;
-        private HuBei hb_interface = null;
-        private KangShiBai ksb_interface = null;
-        private ShangRao ss_interface = null;
-        private ShiShang njss_interface = null;
-        private WanGuo wg_interface = null;
-        private WeiKe wk_interface = null;
-        private XinDun xd_interface = null;
-        private YiZhongXiang yzx_interface = null;
-        private XinLiYuan xly_interface = null;
-        private ZhongHang zh_interface = null;
-        #endregion
 
         public FrmMain()
         {
             InitializeComponent();
-
-            pSingleCar.Location = new Point(6, 24);
-            dgvWaitCarList.Location = new Point(6, 24);
-            pInputZBZL.Location = new Point((int)((pMain.Width - pInputZBZL.Width) / 2), (int)((pMain.Height - pInputZBZL.Height) / 2));
+            pCarList.Location = new Point(2, 116);
+            pCarSingle.Location = new Point(2, 116);
+            this.StartPosition = FormStartPosition.CenterScreen;
         }
 
-        private void FrmMain_Load(object sender, EventArgs e)
+        private void FrmMain1_Load(object sender, EventArgs e)
         {
             #region 获取配置信息
-            if (getNetConfig())
-            {
-                UpdateRtb("已获取联网配置信息");
-            }
+            LwhUploadOnline.UploadConfigModel config_temp = LwhUploadOnline.configControl.getUploadConfig();
+            if (config_temp != null)
+                softConfig = config_temp;
             else
             {
-                MessageBox.Show("联网发车软件初始化时获取联网配置信息失败\r\n请检查配置信息文件是否存在及格式是否正确");
+                MessageBox.Show("获取配置信息失败，请检测配置文件是否存在并重启软件重新配置！");
                 return;
             }
             #endregion
 
+            #region 初始化联网列表数据源
+            dtDgvSource = new DataTable();
+            dtDgvSource.Columns.Add("检验流水号");
+            dtDgvSource.Columns.Add("检验次数");
+            dtDgvSource.Columns.Add("车辆号牌");
+            dtDgvSource.Columns.Add("号牌种类");
+            dtDgvSource.Columns.Add("外廓");
+            dtDgvSource.Columns.Add("称重");
+            dtDgvSource.Columns.Add("长");
+            dtDgvSource.Columns.Add("宽");
+            dtDgvSource.Columns.Add("高");
+            dtDgvSource.Columns.Add("整备质量");
+            dtDgvSource.Columns.Add("轴距");
+            #endregion
+
             #region 初始化联网接口
             DataTable dt_time = null;
-            if (softConfig.WaitCarModel == NetWaitCarModel.大雷联网列表)
+            if (softConfig.WaitCarModel == LwhUploadOnline.NetWaitCarModel.大雷联网列表)
             {
-                #region 大雷待检列表
-                dl_interface = new DaLei(softConfig.JkdzWaitCar);
+                #region 大雷联网列表
+                dl_interface = new LwhUploadOnline.DaLei(softConfig.JkdzWaitCar);
                 dt_time = dl_interface.GetSystemDatetime(softConfig.StationID);
                 if (dt_time != null && dt_time.Rows.Count > 0)
                 {
-                    if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())))
-                        UpdateRtb("同步待检车辆平台时间（" + dt_time.Rows[0]["sj"].ToString() + "）成功");
-                    else
-                        UpdateRtb("更新待检车辆平台时间(" + dt_time.Rows[0]["sj"].ToString() + ")失败");
+                    if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())) == false)
+                        MessageBox.Show("同步平台时间失败！");
                 }
                 else
-                {
-                    UpdateRtb("同步待检车辆平台时间失败");
-                }
+                    MessageBox.Show("获取平台时间失败！");
 
-                btGetWaitInfo.Enabled = true;
-                dgvWaitCarList.Visible = true;
-                tbHPHM.Enabled = false;
-                tbVIN.Enabled = false;
-                cbbHPZL.Enabled = false;
-                cbbJYLB.Enabled = false;
+                pCarList.Visible = true;
                 #endregion
             }
-            else if (softConfig.WaitCarModel == NetWaitCarModel.华燕联网列表)
+            else if (softConfig.WaitCarModel == LwhUploadOnline.NetWaitCarModel.华燕联网列表)
             {
-                #region 华燕待检列表
-                hy_interface = new HuaYan(softConfig.JkdzWaitCar, softConfig.Xtlb, softConfig.JkxlhWaitCar);
+                #region 华燕联网列表
+                hy_interface = new LwhUploadOnline.HuaYan(softConfig.JkdzWaitCar, softConfig.Xtlb, softConfig.JkxlhWaitCar);
                 dt_time = hy_interface.GetSystemDatetime(softConfig.StationID);
                 if (dt_time != null && dt_time.Rows.Count > 0)
                 {
-                    if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())))
-                        UpdateRtb("同步待检车辆平台时间（" + dt_time.Rows[0]["sj"].ToString() + "）成功");
-                    else
-                        UpdateRtb("更新待检车辆平台时间(" + dt_time.Rows[0]["sj"].ToString() + ")失败");
+                    if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())) == false)
+                        MessageBox.Show("同步平台时间失败！");
                 }
                 else
-                {
-                    UpdateRtb("同步待检车辆平台时间失败");
-                    return;
-                }
+                    MessageBox.Show("获取平台时间失败！");
 
-                btGetWaitInfo.Enabled = true;
-                dgvWaitCarList.Visible = true;
-                tbHPHM.Enabled = false;
-                tbVIN.Enabled = false;
-                cbbHPZL.Enabled = false;
-                cbbJYLB.Enabled = false;
-                #endregion
-            }
-            else
-            {
-                #region 联网查询
-                btGetWaitInfo.Text = "查询待检车辆";
-                switch (softConfig.NetModel)
-                {
-                    case NetUploadModel.安车:
-                        #region ac
-                        ac_interface = new AnChe(softConfig.StationID, softConfig.Jkdz1, softConfig.Xtlb, softConfig.Jkxlh, softConfig.CJBH, softConfig.DWJGDM, softConfig.DWMC, softConfig.YHBS, softConfig.YHXM, softConfig.ZDBS);
-                        dt_time = ac_interface.GetSystemDatetime(softConfig.StationID);
-                        if (dt_time != null && dt_time.Rows.Count > 0)
-                        {
-                            if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())))
-                                UpdateRtb("同步并更新上传平台时间（" + dt_time.Rows[0]["sj"].ToString() + "）成功");
-                            else
-                                UpdateRtb("更新上传平台时间(" + dt_time.Rows[0]["sj"].ToString() + ")失败");
-                        }
-                        else
-                        {
-                            UpdateRtb("同步上传平台时间失败");
-                            return;
-                        }
-                        #endregion
-                        break;
-                    case NetUploadModel.安徽:
-                        break;
-                    case NetUploadModel.宝辉:
-                        break;
-                    case NetUploadModel.大雷:
-                        #region dl
-                        if (softConfig.WaitCarModel != NetWaitCarModel.大雷联网列表)
-                        {
-                            dl_interface = new DaLei(softConfig.Jkdz1);
-                            dt_time = dl_interface.GetSystemDatetime(softConfig.StationID);
-                            if (dt_time != null && dt_time.Rows.Count > 0)
-                            {
-                                if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())))
-                                    UpdateRtb("同步并更新上传平台时间（" + dt_time.Rows[0]["sj"].ToString() + "）成功");
-                                else
-                                    UpdateRtb("更新时间(" + dt_time.Rows[0]["sj"].ToString() + ")失败");
-                            }
-                            else
-                            {
-                                UpdateRtb("同步上传平台时间失败");
-                            }
-                        }
-                        #endregion
-                        break;
-                    case NetUploadModel.广西:
-                        break;
-                    case NetUploadModel.海城新疆:
-                        break;
-                    case NetUploadModel.海城四川:
-                        break;
-                    case NetUploadModel.华燕:
-                        #region hy
-                        hy_interface = new HuaYan(softConfig.Jkdz1, softConfig.Xtlb, softConfig.Jkxlh);
-                        dt_time = hy_interface.GetSystemDatetime(softConfig.StationID);
-                        if (dt_time != null && dt_time.Rows.Count > 0)
-                        {
-                            if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())))
-                                UpdateRtb("同步上传平台时间（" + dt_time.Rows[0]["sj"].ToString() + "）成功");
-                            else
-                                UpdateRtb("更新上传平台时间(" + dt_time.Rows[0]["sj"].ToString() + ")失败");
-                        }
-                        else
-                        {
-                            UpdateRtb("同步上传台时间失败");
-                            return;
-                        }
-                        #endregion
-                        break;
-                    case NetUploadModel.湖北:
-                        break;
-                    case NetUploadModel.康士柏:
-                        break;
-                    case NetUploadModel.欧润特:
-                        break;
-                    case NetUploadModel.上饶:
-                        break;
-                    case NetUploadModel.南京新仕尚:
-                        break;
-                    case NetUploadModel.万国:
-                        break;
-                    case NetUploadModel.维科:
-                        break;
-                    case NetUploadModel.新盾:
-                        break;
-                    case NetUploadModel.新力源:
-                        break;
-                    case NetUploadModel.益中祥:
-                        break;
-                    case NetUploadModel.中航:
-                        break;
-                    default:
-                        break;
-                }
-
-                btGetWaitInfo.Enabled = true;
-                pSingleCar.Visible = true;
-                ckQGLC.Enabled = false;
-                #endregion
-            }
-            #endregion
-        }
-
-        /// <summary>
-        /// 刷新待检车辆
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btGetWaitInfo_Click(object sender, EventArgs e)
-        {
-            waitCarInfoZhu = null;
-            waitCarInfoGua = null;
-            dtWaitCarList = null;
-
-            if (softConfig.WaitCarModel == NetWaitCarModel.华燕联网列表)
-            {
-                #region 华燕待检列表方式
-                Init_Dgv();
-
-                //获取待检车辆列表
-                dtWaitCarList = hy_interface.GetVehicleList();
-
-                //更新待检车辆列表到dgv
-                if (dtWaitCarList != null && dtWaitCarList.Rows.Count > 0)
-                {
-                    dgvWaitCarList.DataSource = dtWaitCarList;//设置数据源
-
-                    #region 车辆类型为挂车时将车牌号添加到挂车选择列表中
-                    for (int i = 0; i < dtWaitCarList.Rows.Count; i++)
-                    {
-                        if (dtWaitCarList.Rows[i]["hpzlid"].ToString() == "15" || dtWaitCarList.Rows[i]["hpzl"].ToString().Contains("挂车") || dtWaitCarList.Rows[i]["hpzl"].ToString().Contains("15"))
-                        {
-                            cbbGCHP.Items.Add(dtWaitCarList.Rows[i]["cph"].ToString() + "_" +
-                                              dtWaitCarList.Rows[i]["jylsh"].ToString() + "_" +
-                                              dtWaitCarList.Rows[i]["jycs"].ToString() + "_" +
-                                              dtWaitCarList.Rows[i]["M1"].ToString() + "_" +
-                                              dtWaitCarList.Rows[i]["Z1"].ToString());
-                        }
-                    }
-                    #endregion
-
-                    dgvWaitCarList.Rows[0].Cells[1].Selected = true;
-                }
-                else
-                {
-                    UpdateRtb("未查到待检车辆或查询失败");
-                    return;
-                }
-                #endregion
-            }
-            else if (softConfig.WaitCarModel == NetWaitCarModel.大雷联网列表)
-            {
-                #region 大雷待检列表方式
-                Init_Dgv();
-
-                //获取待检车辆列表
-                dtWaitCarList = dl_interface.GetVehicleList();
-                //更新待检车辆列表到dgv
-                if (dtWaitCarList != null && dtWaitCarList.Rows.Count > 0)
-                {
-                    dgvWaitCarList.DataSource = dtWaitCarList;//设置数据源
-
-                    #region 车辆类型为挂车时将车牌号添加到挂车选择列表中
-                    for (int i = 0; i < dtWaitCarList.Rows.Count; i++)
-                    {
-                        if (dtWaitCarList.Rows[i]["cllx"].ToString().StartsWith("B"))
-                            cbbGCHP.Items.Add(dtWaitCarList.Rows[i]["hphm"].ToString() + "_" +
-                                              dtWaitCarList.Rows[i]["jylsh"].ToString() + "_" +
-                                              dtWaitCarList.Rows[i]["jycs"].ToString());
-                    }
-                    #endregion
-
-                    #region 调整显示顺序
-                    dgvWaitCarList.Columns["jylsh"].DisplayIndex = 0;
-                    dgvWaitCarList.Columns["jycs"].DisplayIndex = 1;
-                    dgvWaitCarList.Columns["hphm"].DisplayIndex = 2;
-                    dgvWaitCarList.Columns["hpzl"].DisplayIndex = 3;
-                    dgvWaitCarList.Columns["clsbdh"].DisplayIndex = 4;
-                    dgvWaitCarList.Columns["cwkc"].DisplayIndex = 5;
-                    dgvWaitCarList.Columns["cwkk"].DisplayIndex = 6;
-                    dgvWaitCarList.Columns["cwkg"].DisplayIndex = 7;
-                    for (int i = 8; i < dgvWaitCarList.Columns.Count - 1; i++)
-                    {
-                        dgvWaitCarList.Columns[i].Visible = false;
-                    }
-                    #endregion
-
-                    dgvWaitCarList.Rows[0].Cells[1].Selected = true;
-                }
-                else
-                {
-                    UpdateRtb("未查到待检车辆或查询失败");
-                    return;
-                }
+                pCarList.Visible = true;
                 #endregion
             }
             else
             {
                 #region 联网查询方式
-                Init_pSingle();
-
-                string code, msg;
                 switch (softConfig.NetModel)
                 {
-                    case NetUploadModel.安车:
-                        dtWaitCarList = ac_interface.GetVehicleInf(tbHPHM.Text, cbbHPZL.Text, tbVIN.Text, out code, out msg);
-                        if (code == "0" || dtWaitCarList == null || dtWaitCarList.Rows.Count < 1)
+                    case LwhUploadOnline.NetUploadModel.安车:
+                        #region ac
+                        ac_interface = new LwhUploadOnline.AnChe(softConfig.StationID, softConfig.Jkdz, softConfig.Xtlb, softConfig.Jkxlh, softConfig.CJBH, softConfig.DWJGDM, softConfig.DWMC, softConfig.YHBS, softConfig.YHXM, softConfig.ZDBS);
+                        dt_time = ac_interface.GetSystemDatetime(softConfig.StationID);
+                        if (dt_time != null && dt_time.Rows.Count > 0)
                         {
-                            UpdateRtb("待检车辆查询失败或未查到有待检车辆：" + msg);
-                            return;
-                        }
-                        break;
-                    case NetUploadModel.安徽:
-                        break;
-                    case NetUploadModel.宝辉:
-                        break;
-                    case NetUploadModel.大雷:
-                        break;
-                    case NetUploadModel.广西:
-                        break;
-                    case NetUploadModel.海城新疆:
-                        break;
-                    case NetUploadModel.海城四川:
-                        break;
-                    case NetUploadModel.华燕:
-                        break;
-                    case NetUploadModel.湖北:
-                        break;
-                    case NetUploadModel.康士柏:
-                        break;
-                    case NetUploadModel.欧润特:
-                        break;
-                    case NetUploadModel.上饶:
-                        break;
-                    case NetUploadModel.南京新仕尚:
-                        break;
-                    case NetUploadModel.万国:
-                        break;
-                    case NetUploadModel.维科:
-                        break;
-                    case NetUploadModel.新盾:
-                        break;
-                    case NetUploadModel.新力源:
-                        break;
-                    case NetUploadModel.益中祥:
-                        break;
-                    case NetUploadModel.中航:
-                        break;
-                    default:
-                        UpdateRtb("暂不支持待检车辆查询方式");
-                        return;
-                }
-
-                waitCarInfoZhu = UpdateWaitCarInfo(dtWaitCarList.Rows[0]);//更新待检车辆信息
-                btSendToTest.Enabled = true;
-                #endregion
-            }
-        }
-
-        /// <summary>
-        /// 发车上线
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btSendToTest_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                //校验待检车辆信息是否完整
-                if (waitCarInfoZhu != null && waitCarInfoZhu.IsReadyToTest)
-                {
-                    waitCarInfoZhu.SFJCCKG = ckLWH.Checked ? "Y" : "N";
-                    waitCarInfoZhu.SFJCLBGD = ckLB.Checked ? "Y" : "N";
-                    waitCarInfoZhu.SFJCHX = ckHX.Checked ? "Y" : "N";
-                    waitCarInfoZhu.SFJCZJ = ckZJ.Checked ? "Y" : "N";
-                    waitCarInfoZhu.SFJCZBZL = ckZBZL.Checked ? "Y" : "N";
-                }
-                else
-                {
-                    //主车信息为空时，不能开始检测
-                    MessageBox.Show("待检车辆信息为空或不全，不能开始检测！");
-                    return;
-                }
-
-                if (ckQGLC.Checked)
-                {
-                    if (waitCarInfoGua != null && waitCarInfoGua.IsReadyToTest)
-                    {
-                        waitCarInfoGua.SFJCCKG = ckLWH_g.Checked ? "Y" : "N";
-                        waitCarInfoGua.SFJCLBGD = ckLB_g.Checked ? "Y" : "N";
-                        waitCarInfoGua.SFJCHX = ckHX_g.Checked ? "Y" : "N";
-                        waitCarInfoGua.SFJCZJ = ckZJ_g.Checked ? "Y" : "N";
-                        waitCarInfoGua.SFJCZBZL = ckZBZL_g.Checked ? "Y" : "N";
-                    }
-                    else
-                    {
-                        //牵挂联测时挂车信息为空，不能开始检测
-                        MessageBox.Show("挂车辆信息为空或不全，不能进行牵挂联测！");
-                        return;
-                    }
-                }
-                else
-                    waitCarInfoGua = null;
-
-                //生成待检车辆信息
-                if (CreateWaitCarInfoFile())
-                {
-                    MessageBox.Show("发车上线成功！");
-                    btSendToTest.Enabled = false;
-                }
-                else
-                    UpdateRtb("发车生成待检车辆文件失败！");
-            }
-            catch (Exception er)
-            {
-                UpdateRtb("检测启动过程出错：" + er.Message);
-            }
-        }
-
-        /// <summary>
-        /// 联网列表方式更换被选待检车辆
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dgvWaitCarList_SelectionChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                if (dgvWaitCarList.CurrentRow.Index > -1)
-                {
-                    if (softConfig.WaitCarModel == NetWaitCarModel.华燕联网列表)
-                    {
-                        #region hy
-                        DataTable dt_temp = null;//查询得到的待检车辆信息表
-                        string code = "", msg = "";
-                        string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
-                        string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
-                        if (dgvWaitCarList.CurrentRow.Cells["M1"].Value.ToString() == "1")
-                        {
-                            dt_temp = hy_interface.GetVehicleInf(jylsh, jycs, "M1", out code, out msg);
+                            if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())) == false)
+                                MessageBox.Show("同步平台时间失败！");
                         }
                         else
+                            MessageBox.Show("获取平台时间失败！");
+                        #endregion
+                        break;
+                    case LwhUploadOnline.NetUploadModel.安徽:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.宝辉:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.大雷:
+                        #region dl
+                        if (softConfig.WaitCarModel != LwhUploadOnline.NetWaitCarModel.大雷联网列表)
                         {
-                            dt_temp = hy_interface.GetVehicleInf(jylsh, jycs, "Z1", out code, out msg);
-                        }
-
-                        if (dt_temp != null && dt_temp.Rows.Count > 0)
-                        {
-                            //车辆信息查询结果新增两列，用于标识是否检外廓、整备质量
-                            dt_temp.Columns.Add("M1"); 
-                            dt_temp.Columns.Add("Z1");
-
-                            #region 如果查询的是挂车，则校验是否查到的结果是牵挂联测的结果
-                            DataRow dr_waitcar = null;
-                            if (dt_temp.Rows.Count == 1)
-                                dr_waitcar = dt_temp.Rows[0];
-                            else
+                            dl_interface = new LwhUploadOnline.DaLei(softConfig.Jkdz);
+                            dt_time = dl_interface.GetSystemDatetime(softConfig.StationID);
+                            if (dt_time != null && dt_time.Rows.Count > 0)
                             {
-                                foreach (DataRow dr in dt_temp.Rows)
-                                {
-                                    if (jylsh == dr["jylsh"].ToString() && jycs == dr["jycs"].ToString())
-                                    {
-                                        dr_waitcar = dr;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (dr_waitcar != null)
-                            {
-                                if (dt_temp.Columns.Contains("gcjylsh") && dr_waitcar["gcjyls"].ToString() != "")
-                                    tbInputZbzl.Text = dr_waitcar["gcjyls"].ToString()+"&"+dr_waitcar["zbzl"].ToString();
+                                if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())) == false)
+                                    MessageBox.Show("同步平台时间失败！");
                             }
                             else
-                            {
-                                UpdateRtb("执行查询成功但结果无对应车辆信息");
-                                return;
-                            }
-                            #endregion
-                            dr_waitcar["M1"] = dgvWaitCarList.CurrentRow.Cells["M1"].Value.ToString();
-                            dr_waitcar["Z1"] = dgvWaitCarList.CurrentRow.Cells["Z1"].Value.ToString();
-
-                            waitCarInfoZhu = UpdateWaitCarInfo(dr_waitcar);
-
-                            if (waitCarInfoZhu != null)
-                            {
-                                btSendToTest.Enabled = true;
-                                waitCarInfoZhu.IsReadyToTest = true;//待检车辆信息更新完成，可以进行检测
-                                UpdateRtb("待检车辆信息(主车)已获取且准备好下发检测软件");
-                            }
-                            else
-                            {
-                                UpdateRtb("初始化待下发待检车辆信息(主车)模板失败");
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            waitCarInfoZhu = null;
-                            UpdateRtb("查询待检车辆（" + dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString() + "|" + dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString() + "）信息失败");
-                            return;
+                                MessageBox.Show("获取平台时间失败！");
                         }
                         #endregion
-                    }
-                    else if (softConfig.WaitCarModel == NetWaitCarModel.大雷联网列表)
-                    {
-                        #region dl
-                        DataRow[] drs_temp = dtWaitCarList.Select("jylsh ='" + dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString() + "' and jycs ='" + dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString() + "'");
-
-                        if (drs_temp != null && drs_temp.Length > 0)
+                        break;
+                    case LwhUploadOnline.NetUploadModel.广西:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.海城新疆:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.海城四川:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.华燕:
+                        #region hy
+                        hy_interface = new LwhUploadOnline.HuaYan(softConfig.Jkdz, softConfig.Xtlb, softConfig.Jkxlh);
+                        dt_time = hy_interface.GetSystemDatetime(softConfig.StationID);
+                        if (dt_time != null && dt_time.Rows.Count > 0)
                         {
-                            if (dtWaitCarList.Columns.Contains("jcfs") && drs_temp[0]["jcfs"].ToString().Trim() != "")
-                                daleijcfs = drs_temp[0]["jcfs"].ToString().Trim();
-                            else
-                                daleijcfs = "1";
-
-                            waitCarInfoZhu = UpdateWaitCarInfo(drs_temp[0]);
-
-                            if (waitCarInfoZhu != null)
-                            {
-                                btSendToTest.Enabled = true;
-                                waitCarInfoZhu.IsReadyToTest = true;//待检车辆信息更新完成，可以进行检测
-                                UpdateRtb("待检车辆信息已获取且准备好下发检测软件");
-                            }
-                            else
-                            {
-                                UpdateRtb("初始化待下发待检车辆信息(主车)模板失败");
-                                return;
-                            }
+                            if (SetSysTime.SetLocalTimeByStr(DateTime.Parse(dt_time.Rows[0]["sj"].ToString())) == false)
+                                MessageBox.Show("同步平台时间失败！");
                         }
                         else
-                        {
-                            waitCarInfoZhu = null;
-                            UpdateRtb("查询待检车辆（" + dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString() + "|" + dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString() + "）信息失败");
-                            return;
-                        }
-                        #endregion}
-                    }
-                    else
+                            MessageBox.Show("获取平台时间失败！");
+                        #endregion
+                        break;
+                    case LwhUploadOnline.NetUploadModel.湖北:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.康士柏:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.欧润特:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.上饶:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.南京新仕尚:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.万国:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.维科:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.新盾:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.新力源:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.益中祥:
+                        break;
+                    case LwhUploadOnline.NetUploadModel.中航:
+                        break;
+                    default:
+                        MessageBox.Show("不支持的联网方式！");
                         return;
                 }
+
+                pCarSingle.Visible = true;
+                #endregion
             }
-            catch (Exception er)
-            {
-                waitCarInfoZhu = null;
-                UpdateRtb("获取车辆信息出错：" + er.Message);
-            }
+            #endregion
+
+            btSeach.Enabled = true;
         }
 
         /// <summary>
-        /// 勾选牵挂联测时初始化挂车检测选项信息
+        /// 待检车辆查询
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ckQGLC_CheckedChanged(object sender, EventArgs e)
+        private void btSeach_Click(object sender, EventArgs e)
         {
-            cbbGCHP.Text = "";
-
-            if (ckQGLC.Checked)//当前只考虑有待检列表的牵挂联测
+            if (pCarList.Visible)
             {
-                if (ckZBZL.Checked)
+                #region 待检列表查询
+                if (WaitCarList != null && WaitCarList.Count > 0 && (tbJYLSH.Text != "" || tbHPHM.Text != "" || cbbHPZL.Text != "" || tbVIN.Text != "" || cbbJYLB.Text != ""))
                 {
-                    ckZBZL.Checked = false;
-                    UpdateRtb("牵挂联测时不能同时检测牵引车整备质量，故将牵引车整备质量项目置为不检");
+                    #region dgv有数据且有查询条件时，模糊查询lvWaitCarList中对应条件的待检车辆信息
+                    List<WaitCarModel> waitcar_temp = new List<WaitCarModel>();
+                    for (int i = 0; i < WaitCarList.Count; i++)
+                    {
+                        WaitCarModel temp = WaitCarList[i];
+                        if ((tbJYLSH.Text != "" && temp.WGJYH.Contains(tbJYLSH.Text)) ||
+                             tbHPHM.Text != "" && temp.CLPH.Contains(tbHPHM.Text) ||
+                             cbbHPZL.Text != "" && cbbHPZL.Text.Contains(temp.HPZL) ||
+                             tbVIN.Text != "" && temp.VIN.Contains(tbVIN.Text) ||
+                             ((cbbJYLB.SelectedIndex == 0 && temp.JCLX == "1")||(cbbJYLB.SelectedIndex > 0 && temp.JCLX == "0")))
+                            waitcar_temp.Add(temp);
+                    }
+
+                    ShowWaitCarList(waitcar_temp);//刷新待检列表
+                    #endregion
                 }
-                ckZBZL.Enabled = false;
-                
-                //初始化挂车待检车辆信息状态，允许选择挂车
-                gpGuaChe.Enabled = true;
-                ckZJ_g.Checked = false;
-                ckLB_g.Checked = false;
-                ckHX_g.Checked = false;
+                else
+                {
+                    #region dgv无数据、有数据但无查询条件时查询平台数据，从平台查询待检车辆信息
+                    刷新待检列表ToolStripMenuItem.PerformClick();
+                    #endregion
+                }
+                #endregion
             }
             else
             {
-                ckZBZL.Enabled = true;
-                waitCarInfoGua = null;
-            }
-        }
-
-        /// <summary>
-        /// 要执行牵挂联测选着挂车信息
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbbGCHP_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (cbbGCHP.Text == "" || cbbGCHP.SelectedIndex < 0)
-                return;
-
-            try
-            {
-                waitCarInfoGua = new WaitCarModel();
-                string[] jcxx = cbbGCHP.Text.Split('_');//根据不同的联网方式，挂车号牌的组成各不相同
-                DataRow[] drs_waitcar = null;
-                DataRow dr_waitcar = null;
-                string code = "", msg = "";
-
-                if (softConfig.WaitCarModel == NetWaitCarModel.华燕联网列表)
-                {
-                    #region hy
-                    DataTable dt_temp_hy = hy_interface.GetVehicleInf(jcxx[1], jcxx[2], jcxx[3] == "1" ? "M1" : "Z1", out code, out msg);
-
-                    if (dt_temp_hy != null && dt_temp_hy.Rows.Count > 0)
-                    {
-                        if (dt_temp_hy.Rows.Count == 1)
-                            dr_waitcar = dt_temp_hy.Rows[0];
-                        else
-                        {
-                            foreach (DataRow dr in dt_temp_hy.Rows)
-                            {
-                                if (jcxx[1] == dr["jylsh"].ToString() && jcxx[2] == dr["jycs"].ToString())
-                                {
-                                    dr_waitcar = dr;
-                                    break;
-                                }
-                            }
-                        }
-                        if (dr_waitcar == null)
-                        {
-                            UpdateRtb("执行查询成功但无挂车车辆信息");
-                            ckQGLC.Checked = false;
-                            return;
-                        }
-                        #region 获取整备质量信息
-                        if (jcxx[4] == "1")
-                        {
-                            string[] temp = null;
-                            if (tbInputZbzl.Text.Contains("&"))
-                            {
-                                temp = tbInputZbzl.Text.Split('&');
-                                if (temp[0] == dr_waitcar["jylsh"].ToString())
-                                {
-                                    waitCarInfoGua.QYCHP = temp[1];
-                                    ckZBZL_g.Checked = true;
-                                }
-                                else
-                                {
-                                    DialogResult dr = MessageBox.Show("牵挂联测模式下检测挂车整备质量但未获取到牵引车整备质量\r\n是否继续检测？", "警告信息", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                                    if (dr == DialogResult.OK)
-                                    {
-                                        //继续检测择弹出提示整备质量输入提示框
-                                        pInputZBZL.BringToFront();
-                                        pInputZBZL.Visible = true;
-                                    }
-                                    else
-                                    {
-                                        //其他（点取消按钮）执行代码
-                                        UpdateRtb("牵挂联测时检测挂车整备质量且无牵引车整备质量，退出检测！");
-                                        ckQGLC.Checked = false;
-                                        return;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                DialogResult dr = MessageBox.Show("牵挂联测模式下检测挂车整备质量但未获取到牵引车整备质量\r\n是否继续检测？", "警告信息", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                                if (dr == DialogResult.OK)
-                                {
-                                    //继续检测择弹出提示整备质量输入提示框
-                                    pInputZBZL.BringToFront();
-                                    pInputZBZL.Visible = true;
-                                }
-                                else
-                                {
-                                    //其他（点取消按钮）执行代码
-                                    UpdateRtb("牵挂联测时检测挂车整备质量且无牵引车整备质量，退出检测！");
-                                    ckQGLC.Checked = false;
-                                    return;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            ckZBZL.Checked = false;
-                            ckZBZL_g.Checked = false;
-                        }
-                        #endregion
-
-                        waitCarInfoGua.WGJYH = dr_waitcar["jylsh"].ToString();
-                        waitCarInfoGua.JCCS = dr_waitcar["jycs"].ToString();
-                        waitCarInfoGua.CLPH = dr_waitcar["cph"].ToString();
-                        waitCarInfoGua.JCLX = waitCarInfoGua.CLPH == "" ? "1" : "0";
-                        waitCarInfoGua.HPYS = "";
-                        waitCarInfoGua.HPZL = dr_waitcar["hpzlid"].ToString();
-                        waitCarInfoGua.FDJHM = dr_waitcar["fdjh"].ToString();
-                        waitCarInfoGua.PPXH = dr_waitcar["clpp"].ToString();
-                        waitCarInfoGua.VIN = dr_waitcar["clsbdh"].ToString();
-                        waitCarInfoGua.CLLX = dr_waitcar["cllx"].ToString() + dr_waitcar["cllxstr"].ToString();
-                        waitCarInfoGua.CZ = dr_waitcar["syr"].ToString();
-                        waitCarInfoGua.CD = int.Parse(dr_waitcar["cwkc"].ToString());
-                        waitCarInfoGua.KD = int.Parse(dr_waitcar["cwkk"].ToString());
-                        waitCarInfoGua.GD = int.Parse(dr_waitcar["cwkg"].ToString());
-                        waitCarInfoGua.HXCD = 0;
-                        waitCarInfoGua.HXKD = 0;
-                        waitCarInfoGua.HXGD = 0;
-                        waitCarInfoGua.LBGD = 0;
-                        waitCarInfoGua.ZJ1 = 0;
-                        waitCarInfoGua.ZJ2 = 0;
-                        waitCarInfoGua.ZJ3 = 0;
-                        waitCarInfoGua.ZJ4 = 0;
-                        waitCarInfoGua.ZBZL = int.Parse(dr_waitcar["zbzl"].ToString());
-                        waitCarInfoGua.SCZBZL = 0;
-                        waitCarInfoGua.ZDZZL = dr_waitcar["zczl"].ToString() == "" ? 0 : int.Parse(dr_waitcar["zczl"].ToString());
-                        ckLWH_g.Checked = true;
-                        
-                        //显示选中车辆信息
-                        string hy_waitcar_info = "挂车待检车辆信息查询结果如下：\r\n车牌号：" + waitCarInfoGua.CLPH + "|检验流水号：" + waitCarInfoGua.WGJYH + "|检验次数：" + waitCarInfoGua.JCCS + "|检验类别：" + waitCarInfoGua.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                                "\r\n外廓尺寸标准数据：" + waitCarInfoGua.CD.ToString() + "x" + waitCarInfoGua.KD.ToString() + "x" + waitCarInfoGua.GD.ToString();
-                        UpdateRtb(hy_waitcar_info);
-                    }
-                    else
-                    {
-                        UpdateRtb("获取挂车车辆信息失败：" + msg);
-                        ckQGLC.Checked = false;
-                        return;
-                    }
-                    #endregion
-                }
-                else if (softConfig.WaitCarModel == NetWaitCarModel.大雷联网列表)
-                {
-                    #region dl
-                    drs_waitcar = dtWaitCarList.Select("jylsh = '" + jcxx[1] + "' and jycs = '" + jcxx[2] + "'");
-                    if (drs_waitcar != null && drs_waitcar.Length > 0)
-                    {
-                        dr_waitcar = drs_waitcar[0];
-
-                        waitCarInfoGua.WGJYH = dr_waitcar["jylsh"].ToString();
-                        waitCarInfoGua.JCCS = dr_waitcar["jycs"].ToString();
-                        waitCarInfoGua.CLPH = dr_waitcar["cph"].ToString();
-                        waitCarInfoGua.JCLX = waitCarInfoGua.CLPH == "" ? "1" : "0";
-                        waitCarInfoGua.HPYS = "";
-                        waitCarInfoGua.HPZL = dr_waitcar["hpzlid"].ToString();
-                        waitCarInfoGua.FDJHM = dr_waitcar["fdjh"].ToString();
-                        waitCarInfoGua.PPXH = dr_waitcar["clpp"].ToString();
-                        waitCarInfoGua.VIN = dr_waitcar["clsbdh"].ToString();
-                        waitCarInfoGua.CLLX = dr_waitcar["cllx"].ToString() + dr_waitcar["cllxstr"].ToString();
-                        waitCarInfoGua.CZ = dr_waitcar["syr"].ToString();
-                        waitCarInfoGua.CD = int.Parse(dr_waitcar["cwkc"].ToString());
-                        waitCarInfoGua.KD = int.Parse(dr_waitcar["cwkk"].ToString());
-                        waitCarInfoGua.GD = int.Parse(dr_waitcar["cwkg"].ToString());
-                        waitCarInfoGua.HXCD = 0;
-                        waitCarInfoGua.HXKD = 0;
-                        waitCarInfoGua.HXGD = 0;
-                        waitCarInfoGua.LBGD = 0;
-                        waitCarInfoGua.ZJ1 = 0;
-                        waitCarInfoGua.ZJ2 = 0;
-                        waitCarInfoGua.ZJ3 = 0;
-                        waitCarInfoGua.ZJ4 = 0;
-                        waitCarInfoGua.ZBZL = int.Parse(dr_waitcar["zbzl"].ToString());
-                        waitCarInfoGua.SCZBZL = 0;
-                        waitCarInfoGua.ZDZZL = dr_waitcar["zczl"].ToString() == "" ? 0 : int.Parse(dr_waitcar["zczl"].ToString());
-
-                        #region 确定检测项目
-                        ckLWH_g.Checked = (dr_waitcar["clwkbz"].ToString() == "1");
-                        ckZJ_g.Checked = (dr_waitcar["zjbz"].ToString() == "1");
-                        ckLB_g.Checked = (dr_waitcar["lbjcbz"].ToString() == "1");
-                        ckHX_g.Checked = false;
-                        ckZBZL_g.Checked = (dr_waitcar["zbzlbz"].ToString() == "1");
-                        if (ckZBZL_g.Checked)
-                        {
-                            //牵挂联测要检挂车整备质量时，先确认牵引车是否检整备质量，在检查是否下发牵引车整备质量，若无弹出对话框输入或取消检测
-                            if (ckZBZL.Checked)
-                            {
-                                DialogResult dr = MessageBox.Show("牵挂联测时不能检测牵引车整备质量\r\n当前检测项目已勾选牵引车整备质量\r\n若要继续检测将自动取消检测牵引车整备质量\r\n是否继续进行检测？", "警告信息", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                                if (dr == DialogResult.OK)
-                                {
-                                    //确认执行代码
-                                    ckZBZL.Checked = false;
-                                    ckZBZL.Enabled = false;
-                                }
-                                else
-                                {
-                                    //其他（点取消按钮）执行代码
-                                    UpdateRtb("牵挂联测时不能检测牵引车整备质量，请单检牵引车整备质量或牵挂联测挂车整备质量！");
-                                    ckQGLC.Checked = false;
-                                    return;
-                                }
-                            }
-
-                            if (dtWaitCarList.Columns.Contains("qyczbzl"))
-                            {
-                                int zbzltemp = 0;
-                                if (dr_waitcar["qyczbzl"].ToString() != "" && int.TryParse(dr_waitcar["qyczbzl"].ToString(), out zbzltemp) && zbzltemp > 0)
-                                {
-                                    waitCarInfoGua.QYCHP = zbzltemp.ToString();
-                                }
-                                else
-                                {
-                                    DialogResult dr = MessageBox.Show("牵挂联测模式下检测挂车整备质量但下发牵引车整备质量(" + dr_waitcar["qyczbzl"].ToString() + ")数据异常\r\n是否继续检测？", "警告信息", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                                    if (dr == DialogResult.OK)
-                                    {
-                                        //继续检测择弹出提示整备质量输入提示框
-                                        pInputZBZL.BringToFront();
-                                        pInputZBZL.Visible = true;
-                                    }
-                                    else
-                                    {
-                                        //其他（点取消按钮）执行代码
-                                        UpdateRtb("牵挂联测时检测挂车整备质量且无牵引车整备质量，退出检测！");
-                                        ckQGLC.Checked = false;
-                                        return;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                DialogResult dr = MessageBox.Show("牵挂联测模式下检测挂车整备质量但未下发牵引车整备质量\r\n是否继续检测？", "警告信息", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-                                if (dr == DialogResult.OK)
-                                {
-                                    //继续检测择弹出提示整备质量输入提示框
-                                    pInputZBZL.BringToFront();
-                                    pInputZBZL.Visible = true;
-                                }
-                                else
-                                {
-                                    //其他（点取消按钮）执行代码
-                                    UpdateRtb("牵挂联测时检测挂车整备质量且无牵引车整备质量，退出检测！");
-                                    ckQGLC.Checked = false;
-                                    return;
-                                }
-                            }
-                        }
-                        #endregion
-
-                        //显示选中车辆信息
-                        string dl_waitcar_info = "挂车待检车辆信息查询结果如下：\r\n车牌号：" + waitCarInfoGua.CLPH + "|检验流水号：" + waitCarInfoGua.WGJYH + "|检验次数：" + waitCarInfoGua.JCCS + "|检验类别：" + waitCarInfoGua.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                                "\r\n外廓尺寸标准数据：" + waitCarInfoGua.CD.ToString() + "x" + waitCarInfoGua.KD.ToString() + "x" + waitCarInfoGua.GD.ToString();
-                        UpdateRtb(dl_waitcar_info);
-                    }
-                    else
-                    {
-                        UpdateRtb("获取挂车车辆信息失败：" + msg);
-                        ckQGLC.Checked = false;
-                        return;
-                    }
-                    #endregion
-                }
-                else
-                {
-                    #region 联网查询方式
-                    switch (softConfig.NetModel)
-                    {
-                        case NetUploadModel.安车:
-                            break;
-                        case NetUploadModel.安徽:
-                            break;
-                        case NetUploadModel.宝辉:
-                            break;
-                        case NetUploadModel.大雷:
-                            break;
-                        case NetUploadModel.广西:
-                            break;
-                        case NetUploadModel.海城新疆:
-                            break;
-                        case NetUploadModel.海城四川:
-                            break;
-                        case NetUploadModel.华燕:
-                            break;
-                        case NetUploadModel.湖北:
-                            break;
-                        case NetUploadModel.康士柏:
-                            break;
-                        case NetUploadModel.欧润特:
-                            break;
-                        case NetUploadModel.上饶:
-                            break;
-                        case NetUploadModel.南京新仕尚:
-                            break;
-                        case NetUploadModel.万国:
-                            break;
-                        case NetUploadModel.维科:
-                            break;
-                        case NetUploadModel.新盾:
-                            break;
-                        case NetUploadModel.新力源:
-                            break;
-                        case NetUploadModel.益中祥:
-                            break;
-                        case NetUploadModel.中航:
-                            break;
-                        default:
-                            break;
-                    }
-
-                    return;
-                    #endregion
-                }
-
-                waitCarInfoGua.IsReadyToTest = true;
-            }
-            catch (Exception er)
-            {
-                ckQGLC.Checked = false;
-                UpdateRtb("获取挂车信息出错：\r\n" + er.Message);
-            }
-        }
-
-        #region 功能函数
-        /// <summary>
-        /// 获取联网配置信息
-        /// </summary>
-        /// <returns></returns>
-        public bool getNetConfig()
-        {
-            try
-            {
-                UploadConfigModel config = new UploadConfigModel();
-
-                string config_path = global_path + "\\uploadConfig.ini";
-                StringBuilder temp = new StringBuilder();
-                temp.Length = 2048;
-                int i = 0;
-
-                IOControl.GetPrivateProfileString("联网配置", "待检车辆来源", "0", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i))
-                    config.WaitCarModel = (NetWaitCarModel)i;
-                else
-                    config.WaitCarModel = NetWaitCarModel.联网查询;
-
-                IOControl.GetPrivateProfileString("联网配置", "待检车辆接口地址", "", temp, 2048, config_path);
-                config.JkdzWaitCar = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "待检车辆接口序列号", "", temp, 2048, config_path);
-                config.JkxlhWaitCar = temp.ToString().Trim();
-
-
-                IOControl.GetPrivateProfileString("联网配置", "联网模式", "0", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i))
-                    config.NetModel = (NetUploadModel)i;
-                else
-                    config.NetModel = NetUploadModel.安车;
-
-                IOControl.GetPrivateProfileString("联网配置", "联网地区", "0", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i))
-                    config.NetArea = (NetAreaModel)i;
-                else
-                    config.NetArea = NetAreaModel.四川;
-
-                IOControl.GetPrivateProfileString("联网配置", "接口地址一", "", temp, 2048, config_path);
-                config.Jkdz1 = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "接口地址二", "", temp, 2048, config_path);
-                config.Jkdz2 = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "接口序列号", "", temp, 2048, config_path);
-                config.Jkxlh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "本机IP地址", "", temp, 2048, config_path);
-                config.LocalIP = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "系统类别", "", temp, 2048, config_path);
-                config.Xtlb = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "检测站编号", "", temp, 2048, config_path);
-                config.StationID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "检测线编号", "", temp, 2048, config_path);
-                config.LineID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "外廓工位号", "", temp, 2048, config_path);
-                config.WkDeviceID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "整备质量工位号", "", temp, 2048, config_path);
-                config.ZbzlDeviceID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "外廓前照编号", "", temp, 2048, config_path);
-                config.WkFrontPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "外廓后照编号", "", temp, 2048, config_path);
-                config.WkBackPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "整备质量前照编号", "", temp, 2048, config_path);
-                config.ZbzlFrontPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "整备质量后照编号", "", temp, 2048, config_path);
-                config.ZbzlBackPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "照片上传次数", "", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i) && i > 0)
-                    config.PicSendTimes = i;
-                else
-                    config.PicSendTimes = 1;
-
-                IOControl.GetPrivateProfileString("联网配置", "场景编号", "", temp, 2048, config_path);
-                config.CJBH = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "单位名称", "", temp, 2048, config_path);
-                config.DWMC = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "单位机构代码", "", temp, 2048, config_path);
-                config.DWJGDM = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "用户标识", "", temp, 2048, config_path);
-                config.YHBS = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "用户姓名", "", temp, 2048, config_path);
-                config.YHXM = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "终端标识", "", temp, 2048, config_path);
-                config.ZDBS = temp.ToString().Trim();
-
-                softConfig = config;
-
-                return true;
-            }
-            catch (Exception er)
-            {
-                IOControl.WriteLogs("获取联网配置出错：" + er.Message);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 初始化待检列表显示
-        /// </summary>
-        private void Init_Dgv()
-        {
-            try
-            {
-                //清空dgv待检列表
-                if (dgvWaitCarList.Rows.Count > 0)
-                    dgvWaitCarList.Rows.Clear();
-
-                //清空挂车待检车辆
-                if (cbbGCHP.Items.Count > 0)
-                    cbbGCHP.Items.Clear();
-
-                //初始化检测项目
-                ckLWH.Checked = false;
-                ckLWH_g.Checked = false;
-                ckZJ.Checked = false;
-                ckZJ_g.Checked = false;
-                ckLB.Checked = false;
-                ckLB_g.Checked = false;
-                ckHX.Checked = false;
-                ckHX_g.Checked = false;
-                ckZBZL.Checked = false;
-                ckZBZL_g.Checked = false;
-
-                ckQGLC.Checked = false;
-            }
-            catch (Exception er)
-            {
-                
-            }
-        }
-
-        /// <summary>
-        /// 初始化单车待检车辆信息显示
-        /// </summary>
-        private void Init_pSingle()
-        {
-            try
-            {
-                //清空查询信息
-                tbHPHM.Text = "";
-                tbVIN.Text = "";
-                cbbHPZL.Text = "";
-                cbbJYLB.Text = "";
-                cbbGCHP.Text = "";
-
+                #region 单车待检车辆信息查询，从平台查询对应条件的待检车辆信息
+                #region 初始化查询显示结果
                 //清空待检车辆信息
                 lbJYLSH.Text = "-";
                 lbJYLB.Text = "-";
@@ -1168,316 +280,511 @@ namespace NetSendWaitCar
                 lbZBZLBZ.Text = "-";
 
                 //初始化检测项目
-                ckLWH.Checked = false;
-                ckLWH_g.Checked = false;
-                ckZJ.Checked = false;
-                ckZJ_g.Checked = false;
-                ckLB.Checked = false;
-                ckLB_g.Checked = false;
-                ckHX.Checked = false;
-                ckHX_g.Checked = false;
-                ckZBZL.Checked = false;
-                ckZBZL_g.Checked = false;
-                ckQGLC.Checked = false;
-            }
-            catch (Exception er)
-            {
+                ckLWH_s.Checked = false;
+                ckZJ_s.Checked = false;
+                ckLB_s.Checked = false;
+                ckHX_s.Checked = false;
+                ckZBZL_s.Checked = false;
+                #endregion
 
+                WaitCarModel waitcar_single = new WaitCarModel();
+                string code, msg;
+                DataTable dt_WaitCar = null;
+                try
+                {
+                    switch (softConfig.NetModel)
+                    {
+                        case LwhUploadOnline.NetUploadModel.安车:
+                            #region ac
+                            dt_WaitCar = ac_interface.GetVehicleInf(tbHPHM.Text, cbbHPZL.Text, tbVIN.Text, out code, out msg);
+
+                            if (dt_WaitCar != null && dt_WaitCar.Rows.Count > 0)
+                            {
+                                DataRow drWaitCar = dt_WaitCar.Rows[0];
+                                waitcar_single.WGJYH = drWaitCar["jylsh"].ToString();
+                                waitcar_single.JCCS = drWaitCar["jycs"].ToString();
+                                waitcar_single.CLPH = drWaitCar["hphm"].ToString();
+                                waitcar_single.JCLX = drWaitCar["jylb"].ToString() == "00" ? "1" : "0";
+                                waitcar_single.HPYS = "";
+                                waitcar_single.HPZL = drWaitCar["hpzl"].ToString();
+                                waitcar_single.FDJHM = drWaitCar["fdjh"].ToString();
+                                waitcar_single.PPXH = drWaitCar["clpp1"].ToString();
+                                waitcar_single.VIN = drWaitCar["clsbdh"].ToString();
+                                waitcar_single.CLLX = drWaitCar["cllx"].ToString();
+                                waitcar_single.CZ = drWaitCar["syr"].ToString();
+                                waitcar_single.CD = drWaitCar["cwkc"].ToString();
+                                waitcar_single.KD = drWaitCar["cwkk"].ToString();
+                                waitcar_single.GD = drWaitCar["cwkg"].ToString();
+                                waitcar_single.HXCD = "0";
+                                waitcar_single.HXKD = "0";
+                                waitcar_single.HXGD = "0";
+                                waitcar_single.LBGD = "0";
+                                waitcar_single.ZS = drWaitCar["zs"].ToString() == "" ? "0" : drWaitCar["zs"].ToString();
+                                waitcar_single.ZJ1 = drWaitCar["zj"].ToString() == "" ? "0" : drWaitCar["zj"].ToString();
+                                waitcar_single.ZJ2 = "0";
+                                waitcar_single.ZJ3 = "0";
+                                waitcar_single.ZJ4 = "0";
+                                waitcar_single.ZBZL = drWaitCar["zbzl"].ToString() == "" ? "0" : drWaitCar["zbzl"].ToString();
+                                waitcar_single.SCZBZL = "0";
+                                waitcar_single.ZDZZL = drWaitCar["zzl"].ToString() == "" ? "0" : drWaitCar["zzl"].ToString();
+
+                                waitcar_single.QYCHP = "";
+                                waitcar_single.SFAZWB = "";
+                                waitcar_single.WBZL = "";
+                                waitcar_single.SFAZQTBJ = "";
+                                waitcar_single.QTBJZL = "";
+                                waitcar_single.QTBJSM = "";
+                            }
+                            else
+                            {
+                                MessageBox.Show("查询待检车辆信息失败：" + msg);
+                                return;
+                            }
+                            #endregion
+                            break;
+                        case LwhUploadOnline.NetUploadModel.安徽:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.宝辉:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.大雷:
+                            #region dl
+
+                            #endregion
+                            break;
+                        case LwhUploadOnline.NetUploadModel.广西:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.海城新疆:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.海城四川:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.华燕:
+                            #region hy
+
+                            #endregion
+                            break;
+                        case LwhUploadOnline.NetUploadModel.湖北:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.康士柏:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.欧润特:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.上饶:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.南京新仕尚:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.万国:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.维科:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.新盾:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.新力源:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.益中祥:
+                            break;
+                        case LwhUploadOnline.NetUploadModel.中航:
+                            break;
+                        default:
+                            MessageBox.Show("未知联网方式！");
+                            return;
+                    }
+                }
+                catch (Exception er)
+                {
+                    MessageBox.Show("从平台获取待检车辆信息出错：" + er.Message);
+                    return;
+                }
+
+                if (waitcar_single != null && waitcar_single.IsReadyToTest)
+                {
+                    waitCarInfoZhu = waitcar_single;
+
+                    //清空待检车辆信息
+                    lbJYLSH.Text = waitCarInfoZhu.WGJYH;
+                    lbJYLB.Text = waitCarInfoZhu.JCLX == "0" ? "车辆年检" : "新车上牌";
+                    lbCPHM.Text = waitCarInfoZhu.CLPH;
+                    lbHPZL.Text = waitCarInfoZhu.HPZL;
+                    lbVIN.Text = waitCarInfoZhu.VIN;
+                    lbCLLX.Text = waitCarInfoZhu.CLLX;
+                    lbLWHBZ.Text = waitCarInfoZhu.CD;
+                    lbHXBZ.Text = waitCarInfoZhu.HXCD + "x" + waitCarInfoZhu.HXKD + "x" + waitCarInfoZhu.HXGD;
+                    lbZJBZ.Text = waitCarInfoZhu.ZJ1+"|"+ waitCarInfoZhu.ZJ2 + "|" + waitCarInfoZhu.ZJ3 + "|" + waitCarInfoZhu.ZJ4;
+                    lbLBBZ.Text = waitCarInfoZhu.LBGD;
+                    lbZBZLBZ.Text = waitCarInfoZhu.ZBZL;
+
+                    //初始化检测项目
+                    ckLWH_s.Checked = waitCarInfoZhu.SFJCCKG == "Y";
+                    ckZJ_s.Checked = waitCarInfoZhu.SFJCZJ == "Y";
+                    ckLB_s.Checked = waitCarInfoZhu.SFJCLBGD == "Y";
+                    ckHX_s.Checked = waitCarInfoZhu.SFJCHX == "Y";
+                    ckZBZL_s.Checked = waitCarInfoZhu.SFJCZBZL == "Y";
+                }
+                #endregion
             }
         }
 
-        /// <summary>
-        /// 根据从平台查询到的待检车辆信息更新显示信息及待检车辆缓存模板（单车模式查询后直接更新，待检列表模式选择待检车辆的时候更新）
-        /// </summary>
-        /// <param name="dr_waitcar">查到的待检车辆</param>
-        /// <returns></returns>
-        private WaitCarModel UpdateWaitCarInfo(DataRow drWaitCar)
+        #region 联网待检列表右键功能
+        private void 单车发车上线ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
-                WaitCarModel waitCar_temp = new WaitCarModel();
+                if (dgvWaitCarList.CurrentRow.Index > -1)
+                {
+                    string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
+                    string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
 
-                if (softConfig.WaitCarModel == NetWaitCarModel.华燕联网列表)
+                    for (int i = 0; i < WaitCarList.Count; i++)
+                    {
+                        if (WaitCarList[i].WGJYH == jylsh && WaitCarList[i].JCCS == jycs)
+                        {
+                            waitCarInfoZhu = WaitCarList[i];
+                            ckQGLC.Checked = false;
+
+                            if (CreateWaitCarInfoFile())
+                                MessageBox.Show("发车上线成功");
+
+                            return;
+                        }
+                    }
+
+                    MessageBox.Show("待检车辆列表已更新，请刷新后重新发车");
+                }
+            }
+            catch (Exception er)
+            {
+                MessageBox.Show("单车发车上线检测出错：" + er.Message);
+            }
+        }
+
+        private void 设为待检主车ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvWaitCarList.CurrentRow.Index > -1)
+                {
+                    string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
+                    string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
+
+                    for (int i = 0; i < WaitCarList.Count; i++)
+                    {
+                        if (WaitCarList[i].WGJYH == jylsh && WaitCarList[i].JCCS == jycs)
+                        {
+                            waitCarInfoZhu = WaitCarList[i];
+
+                            lbZhuCheHPHM.Text = waitCarInfoZhu.CLPH;
+                            lbZhuCheHPZL.Text = waitCarInfoZhu.HPZL;
+
+                            ckLWH_z.Checked = waitCarInfoZhu.SFJCCKG == "Y";
+                            ckZJ_z.Checked = waitCarInfoZhu.SFJCZJ == "Y";
+                            ckLB_z.Checked = waitCarInfoZhu.SFJCLBGD == "Y";
+                            ckHX_z.Checked = waitCarInfoZhu.SFJCHX == "Y";
+                            ckZBZL_z.Checked = waitCarInfoZhu.SFJCZBZL == "Y";
+
+                            return;
+                        }
+                    }
+
+                    lbZhuCheHPHM.Text = "-";
+                    lbZhuCheHPZL.Text = "-";
+                    MessageBox.Show("设为主车失败，可能是待检列表已更新，请刷新后重新设置");
+                }
+            }
+            catch (Exception er)
+            {
+                lbZhuCheHPHM.Text = "-";
+                lbZhuCheHPZL.Text = "-";
+                MessageBox.Show("设置主车出错：" + er.Message);
+            }
+        }
+
+        private void 设为待检挂车ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvWaitCarList.CurrentRow.Index > -1)
+                {
+                    string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
+                    string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
+
+                    for (int i = 0; i < WaitCarList.Count; i++)
+                    {
+                        if (WaitCarList[i].WGJYH == jylsh && WaitCarList[i].JCCS == jycs)
+                        {
+                            waitCarInfoGua = WaitCarList[i];
+
+                            lbGuaCheHPHM.Text = waitCarInfoGua.CLPH;
+                            lbGuaCheHPZL.Text = waitCarInfoGua.HPZL;
+
+                            ckLWH_g.Checked = waitCarInfoGua.SFJCCKG == "Y";
+                            ckZJ_g.Checked = waitCarInfoGua.SFJCZJ == "Y";
+                            ckLB_g.Checked = waitCarInfoGua.SFJCLBGD == "Y";
+                            ckHX_g.Checked = waitCarInfoGua.SFJCHX == "Y";
+                            ckZBZL_g.Checked = waitCarInfoGua.SFJCZBZL == "Y";
+
+                            return;
+                        }
+                    }
+
+                    lbGuaCheHPHM.Text = "-";
+                    lbGuaCheHPZL.Text = "-";
+                    MessageBox.Show("设为主车失败，可能是待检列表已更新，请刷新后重新设置");
+                }
+            }
+            catch (Exception er)
+            {
+                lbGuaCheHPHM.Text = "-";
+                lbGuaCheHPZL.Text = "-";
+                MessageBox.Show("设置主车出错：" + er.Message);
+            }
+        }
+
+        private void 刷新待检列表ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DataTable dt_WaitCarList = null;
+                if (softConfig.WaitCarModel == LwhUploadOnline.NetWaitCarModel.华燕联网列表)
                 {
                     #region hy
-                    waitCar_temp.WGJYH = drWaitCar["jylsh"].ToString();
-                    waitCar_temp.JCCS = drWaitCar["jycs"].ToString();
-                    waitCar_temp.CLPH = drWaitCar["cph"].ToString();
-                    waitCar_temp.JCLX = waitCar_temp.CLPH == "" ? "1" : "0";
-                    waitCar_temp.HPYS = "";
-                    waitCar_temp.HPZL = drWaitCar["hpzlid"].ToString();
-                    waitCar_temp.FDJHM = drWaitCar["fdjh"].ToString();
-                    waitCar_temp.PPXH = drWaitCar["clpp"].ToString();
-                    waitCar_temp.VIN = drWaitCar["clsbdh"].ToString();
-                    waitCar_temp.CLLX = drWaitCar["cllx"].ToString() + drWaitCar["cllxstr"].ToString();
-                    waitCar_temp.CZ = drWaitCar["syr"].ToString();
-                    waitCar_temp.CD = int.Parse(drWaitCar["cwkc"].ToString());
-                    waitCar_temp.KD = int.Parse(drWaitCar["cwkk"].ToString());
-                    waitCar_temp.GD = int.Parse(drWaitCar["cwkg"].ToString());
-                    waitCar_temp.HXCD = 0;
-                    waitCar_temp.HXKD = 0;
-                    waitCar_temp.HXGD = 0;
-                    waitCar_temp.LBGD = 0;
-                    waitCar_temp.ZJ1 = 0;
-                    waitCar_temp.ZJ2 = 0;
-                    waitCar_temp.ZJ3 = 0;
-                    waitCar_temp.ZJ4 = 0;
-                    waitCar_temp.ZBZL = int.Parse(drWaitCar["zbzl"].ToString());
-                    waitCar_temp.SCZBZL = 0;
-                    waitCar_temp.ZDZZL = drWaitCar["zczl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zczl"].ToString());
+                    dt_WaitCarList = hy_interface.GetVehicleList();
+                    if (dt_WaitCarList != null && dt_WaitCarList.Rows.Count > 0)
+                    {
+                        for (int i = 0; i < dt_WaitCarList.Rows.Count; i++)
+                        {
+                            DataTable dt_carinfo_hy = null;
+                            string code = "", msg = "";
+                            if (dt_WaitCarList.Rows[i]["M1"].ToString() == "1")
+                                dt_carinfo_hy = hy_interface.GetVehicleInf(dt_WaitCarList.Rows[i]["jylsh"].ToString(), dt_WaitCarList.Rows[i]["jycs"].ToString(), "M1", out code, out msg);
+                            else
+                                dt_carinfo_hy = hy_interface.GetVehicleInf(dt_WaitCarList.Rows[i]["jylsh"].ToString(), dt_WaitCarList.Rows[i]["jycs"].ToString(), "M1", out code, out msg);
 
-                    #region 确定检测项目
-                    ckLWH.Checked = (drWaitCar["M1"].ToString() == "1");
-                    ckZBZL.Checked = (drWaitCar["Z1"].ToString() == "1");
-                    ckZJ.Checked = false;
-                    ckLB.Checked = false;
-                    ckHX.Checked = false;
-                    #endregion
+                            if (code == "1" && dt_carinfo_hy != null && dt_carinfo_hy.Rows.Count > 0)
+                            {
+                                DataRow dr_temp = dt_carinfo_hy.Rows[0];
+                                WaitCarModel wait_temp = new WaitCarModel();
+                                wait_temp.WGJYH = dr_temp["jylsh"].ToString();
+                                wait_temp.JCCS = dr_temp["jycs"].ToString();
+                                wait_temp.CLPH = dr_temp["cph"].ToString();
+                                wait_temp.JCLX = wait_temp.CLPH == "" ? "1" : "0";
+                                wait_temp.HPYS = "";
+                                wait_temp.HPZL = dr_temp["hpzlid"].ToString() + "_" + dr_temp["hpzl"].ToString();
+                                wait_temp.FDJHM = dr_temp["fdjh"].ToString();
+                                wait_temp.PPXH = dr_temp["clpp"].ToString();
+                                wait_temp.VIN = dr_temp["clsbdh"].ToString();
+                                wait_temp.CLLX = dr_temp["cllx"].ToString() + dr_temp["cllxstr"].ToString();
+                                wait_temp.CZ = dr_temp["syr"].ToString();
+                                wait_temp.CD = dr_temp["cwkc"].ToString();
+                                wait_temp.KD = dr_temp["cwkk"].ToString();
+                                wait_temp.GD = dr_temp["cwkg"].ToString();
+                                wait_temp.HXCD = "0";
+                                wait_temp.HXKD = "0";
+                                wait_temp.HXGD = "0";
+                                wait_temp.LBGD = "0";
+                                wait_temp.ZJ1 = "0";
+                                wait_temp.ZJ2 = "0";
+                                wait_temp.ZJ3 = "0";
+                                wait_temp.ZJ4 = "0";
+                                wait_temp.ZBZL = dr_temp["zbzl"].ToString();
+                                wait_temp.SCZBZL = "0";
+                                wait_temp.ZDZZL = dr_temp["zczl"].ToString() == "" ? "0" : dr_temp["zczl"].ToString();
 
-                    //显示选中车辆信息
-                    UpdateRtb("主车待检车辆信息查询结果如下：\r\n车牌号：" + waitCar_temp.CLPH + "|检验流水号：" + waitCar_temp.WGJYH + "|检验次数：" + waitCar_temp.JCCS + "|检验类别：" + waitCar_temp.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                "\r\n|外廓尺寸标准数据：" + waitCar_temp.CD.ToString() + "x" + waitCar_temp.KD.ToString() + "x" + waitCar_temp.GD.ToString() + "|整备质量：" + waitCar_temp.ZBZL);
+                                wait_temp.QYCHP = "";
+                                wait_temp.SFAZWB = "";
+                                wait_temp.WBZL = "";
+                                wait_temp.SFAZQTBJ = "";
+                                wait_temp.QTBJZL = "";
+                                wait_temp.QTBJSM = "";
+
+                                wait_temp.SFJCCKG = (dt_WaitCarList.Rows[i]["M1"].ToString() == "1" ? "Y" : "N");
+                                wait_temp.SFJCZJ = "N";
+                                wait_temp.SFJCLBGD = "N";
+                                wait_temp.SFJCHX = "N";
+                                wait_temp.SFJCZBZL = (dt_WaitCarList.Rows[i]["Z1"].ToString() == "1" ? "Y" : "N");
+
+                                WaitCarList.Add(wait_temp);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("待检列表查询失败或未查到待检车辆");
+                        return;
+                    }
                     #endregion
                 }
-                else if (softConfig.WaitCarModel == NetWaitCarModel.华燕联网列表)
+                else if (softConfig.WaitCarModel == LwhUploadOnline.NetWaitCarModel.大雷联网列表)
                 {
                     #region dl
-                    waitCar_temp.WGJYH = drWaitCar["jylsh"].ToString();
-                    waitCar_temp.JCCS = drWaitCar["jycs"].ToString();
-                    waitCar_temp.CLPH = drWaitCar["hphm"].ToString();
-                    waitCar_temp.JCLX = drWaitCar["jylb"].ToString() == "00" ? "1" : "0";
-                    waitCar_temp.HPYS = "";
-                    waitCar_temp.HPZL = drWaitCar["hpzl"].ToString();
-                    waitCar_temp.FDJHM = drWaitCar["fdjh"].ToString();
-                    waitCar_temp.PPXH = drWaitCar["clpp"].ToString();
-                    waitCar_temp.VIN = drWaitCar["clsbdh"].ToString();
-                    waitCar_temp.CLLX = drWaitCar["cllx"].ToString();
-                    waitCar_temp.CZ = drWaitCar["syr"].ToString();
-                    waitCar_temp.CD = int.Parse(drWaitCar["cwkc"].ToString());
-                    waitCar_temp.KD = int.Parse(drWaitCar["cwkk"].ToString());
-                    waitCar_temp.GD = int.Parse(drWaitCar["cwkg"].ToString());
-                    waitCar_temp.HXCD = drWaitCar["hxcd"].ToString() == "" ? 0 : int.Parse(drWaitCar["hxcd"].ToString());
-                    waitCar_temp.HXKD = drWaitCar["hxkd"].ToString() == "" ? 0 : int.Parse(drWaitCar["hxkd"].ToString());
-                    waitCar_temp.HXGD = drWaitCar["hxgd"].ToString() == "" ? 0 : int.Parse(drWaitCar["hxgd"].ToString());
-                    waitCar_temp.LBGD = drWaitCar["lbgd"].ToString() == "" ? 0 : int.Parse(drWaitCar["lbgd"].ToString());
-                    waitCar_temp.ZJ1 = drWaitCar["zj1"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj1"].ToString());
-                    waitCar_temp.ZJ2 = drWaitCar["zj2"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj2"].ToString());
-                    waitCar_temp.ZJ3 = drWaitCar["zj3"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj3"].ToString());
-                    waitCar_temp.ZJ4 = drWaitCar["zj4"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj4"].ToString());
-                    waitCar_temp.ZBZL = drWaitCar["zbzl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zbzl"].ToString());
-                    waitCar_temp.SCZBZL = 0;
-                    waitCar_temp.ZDZZL = drWaitCar["zzl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zzl"].ToString());
+                    dt_WaitCarList = dl_interface.GetVehicleList();
+                    if (dt_WaitCarList != null && dt_WaitCarList.Rows.Count > 0)
+                    {
+                        for (int i = 0; i < dt_WaitCarList.Rows.Count; i++)
+                        {
+                            DataRow dr_temp = dt_WaitCarList.Rows[i];
+                            WaitCarModel wait_temp = new WaitCarModel();
+                            wait_temp.WGJYH = dr_temp["jylsh"].ToString();
+                            wait_temp.JCCS = dr_temp["hphm"].ToString();
+                            wait_temp.CLPH = dr_temp["cph"].ToString();
+                            wait_temp.JCLX = dr_temp["jylb"].ToString() == "00" ? "1" : "0";
+                            wait_temp.HPYS = "";
+                            wait_temp.HPZL = dr_temp["hpzl"].ToString();
+                            wait_temp.FDJHM = dr_temp["fdjh"].ToString();
+                            wait_temp.PPXH = dr_temp["clpp"].ToString();
+                            wait_temp.VIN = dr_temp["clsbdh"].ToString();
+                            wait_temp.CLLX = dr_temp["cllx"].ToString();
+                            wait_temp.CZ = dr_temp["syr"].ToString();
+                            wait_temp.CD = dr_temp["cwkc"].ToString();
+                            wait_temp.KD = dr_temp["cwkk"].ToString();
+                            wait_temp.GD = dr_temp["cwkg"].ToString();
+                            wait_temp.HXCD = dr_temp["hxcd"].ToString() == "" ? "0" : dr_temp["hxcd"].ToString();
+                            wait_temp.HXKD = dr_temp["hxkd"].ToString() == "" ? "0" : dr_temp["hxkd"].ToString();
+                            wait_temp.HXGD = dr_temp["hxgd"].ToString() == "" ? "0" : dr_temp["hxgd"].ToString();
+                            wait_temp.LBGD = dr_temp["lbgd"].ToString() == "" ? "0" : dr_temp["lbgd"].ToString();
+                            wait_temp.ZS = dr_temp["czs"].ToString() == "" ? "0" : dr_temp["czs"].ToString();
+                            wait_temp.ZJ1 = dr_temp["zj1"].ToString() == "" ? "0" : dr_temp["zj1"].ToString();
+                            wait_temp.ZJ2 = dr_temp["zj2"].ToString() == "" ? "0" : dr_temp["zj2"].ToString();
+                            wait_temp.ZJ3 = dr_temp["zj3"].ToString() == "" ? "0" : dr_temp["zj3"].ToString();
+                            wait_temp.ZJ4 = dr_temp["zj4"].ToString() == "" ? "0" : dr_temp["zj4"].ToString();
+                            wait_temp.ZBZL = dr_temp["zbzl"].ToString() == "" ? "0" : dr_temp["zbzl"].ToString();
+                            wait_temp.SCZBZL = "0";
+                            wait_temp.ZDZZL = dr_temp["zzl"].ToString() == "" ? "0" : dr_temp["zzl"].ToString();
 
-                    #region 确定检测项目
-                    ckLWH.Checked = (drWaitCar["clwkbz"].ToString() == "1");
-                    ckZJ.Checked = (drWaitCar["zjbz"].ToString() == "1");
-                    ckLB.Checked = (drWaitCar["lbjcbz"].ToString() == "1");
-                    ckHX.Checked = false;
-                    ckZBZL.Checked = (drWaitCar["zbzlbz"].ToString() == "1");
-                    #endregion
+                            wait_temp.QYCHP = "";
+                            wait_temp.SFAZWB = "";
+                            wait_temp.WBZL = "";
+                            wait_temp.SFAZQTBJ = "";
+                            wait_temp.QTBJZL = "";
+                            wait_temp.QTBJSM = "";
 
-                    //显示选中车辆信息
-                    UpdateRtb("主车待检车辆信息查询结果如下：\r\n车牌号：" + waitCar_temp.CLPH + "|检验流水号：" + waitCar_temp.WGJYH + "|检验次数：" + waitCar_temp.JCCS + "|检验类别：" + waitCar_temp.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                "\r\n|外廓尺寸标准数据：" + waitCar_temp.CD.ToString() + "x" + waitCar_temp.KD.ToString() + "x" + waitCar_temp.GD.ToString() + "|整备质量：" + waitCar_temp.ZBZL);
+                            wait_temp.SFJCCKG = (dr_temp["clwkbz"].ToString() == "1" ? "Y" : "N");
+                            wait_temp.SFJCZJ = (dr_temp["zjbz"].ToString() == "1" ? "Y" : "N");
+                            wait_temp.SFJCLBGD = (dr_temp["lbjcbz"].ToString() == "1" ? "Y" : "N");
+                            wait_temp.SFJCHX = "N";
+                            wait_temp.SFJCZBZL = (dr_temp["zbzlbz"].ToString() == "1" ? "Y" : "N");
+
+                            WaitCarList.Add(wait_temp);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("待检列表查询失败或未查到待检车辆");
+                        return;
+                    }
                     #endregion
                 }
                 else
                 {
-                    #region 联网查询
-                    switch (softConfig.NetModel)
-                    {
-                        case NetUploadModel.安车:
-                            #region ac
-                            waitCar_temp.WGJYH = drWaitCar["jylsh"].ToString();
-                            waitCar_temp.JCCS = drWaitCar["jycs"].ToString();
-                            waitCar_temp.CLPH = drWaitCar["hphm"].ToString();
-                            waitCar_temp.JCLX = drWaitCar["jylb"].ToString() == "00" ? "1" : "0";
-                            waitCar_temp.HPYS = "";
-                            waitCar_temp.HPZL = drWaitCar["hpzl"].ToString();
-                            waitCar_temp.FDJHM = drWaitCar["fdjh"].ToString();
-                            waitCar_temp.PPXH = drWaitCar["clpp1"].ToString();
-                            waitCar_temp.VIN = drWaitCar["clsbdh"].ToString();
-                            waitCar_temp.CLLX = drWaitCar["cllx"].ToString();
-                            waitCar_temp.CZ = drWaitCar["syr"].ToString();
-                            waitCar_temp.CD = int.Parse(drWaitCar["cwkc"].ToString());
-                            waitCar_temp.KD = int.Parse(drWaitCar["cwkk"].ToString());
-                            waitCar_temp.GD = int.Parse(drWaitCar["cwkg"].ToString());
-                            waitCar_temp.HXCD = 0;
-                            waitCar_temp.HXKD = 0;
-                            waitCar_temp.HXGD = 0;
-                            waitCar_temp.LBGD = 0;
-                            waitCar_temp.ZJ1 = drWaitCar["zj"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj"].ToString());
-                            waitCar_temp.ZJ2 = 0;
-                            waitCar_temp.ZJ3 = 0;
-                            waitCar_temp.ZJ4 = 0;
-                            waitCar_temp.ZBZL = drWaitCar["zbzl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zbzl"].ToString());
-                            waitCar_temp.SCZBZL = 0;
-                            waitCar_temp.ZDZZL = drWaitCar["zzl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zzl"].ToString());
-
-                            //显示选中车辆信息
-                            UpdateRtb("主车待检车辆信息查询结果如下：\r\n车牌号：" + waitCar_temp.CLPH + "|检验流水号：" + waitCar_temp.WGJYH + "|检验次数：" + waitCar_temp.JCCS + "|检验类别：" + waitCar_temp.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                        "\r\n|外廓尺寸标准数据：" + waitCar_temp.CD.ToString() + "x" + waitCar_temp.KD.ToString() + "x" + waitCar_temp.GD.ToString() + "|整备质量：" + waitCar_temp.ZBZL);
-                            #endregion
-                            break;
-                        case NetUploadModel.安徽:
-                            break;
-                        case NetUploadModel.宝辉:
-                            break;
-                        case NetUploadModel.大雷:
-                            #region dl
-                            waitCar_temp.WGJYH = drWaitCar["jylsh"].ToString();
-                            waitCar_temp.JCCS = drWaitCar["jycs"].ToString();
-                            waitCar_temp.CLPH = drWaitCar["hphm"].ToString();
-                            waitCar_temp.JCLX = drWaitCar["jylb"].ToString() == "00" ? "1" : "0";
-                            waitCar_temp.HPYS = "";
-                            waitCar_temp.HPZL = drWaitCar["hpzl"].ToString();
-                            waitCar_temp.FDJHM = drWaitCar["fdjh"].ToString();
-                            waitCar_temp.PPXH = drWaitCar["clpp"].ToString();
-                            waitCar_temp.VIN = drWaitCar["clsbdh"].ToString();
-                            waitCar_temp.CLLX = drWaitCar["cllx"].ToString();
-                            waitCar_temp.CZ = drWaitCar["syr"].ToString();
-                            waitCar_temp.CD = int.Parse(drWaitCar["cwkc"].ToString());
-                            waitCar_temp.KD = int.Parse(drWaitCar["cwkk"].ToString());
-                            waitCar_temp.GD = int.Parse(drWaitCar["cwkg"].ToString());
-                            waitCar_temp.HXCD = drWaitCar["hxcd"].ToString() == "" ? 0 : int.Parse(drWaitCar["hxcd"].ToString());
-                            waitCar_temp.HXKD = drWaitCar["hxkd"].ToString() == "" ? 0 : int.Parse(drWaitCar["hxkd"].ToString());
-                            waitCar_temp.HXGD = drWaitCar["hxgd"].ToString() == "" ? 0 : int.Parse(drWaitCar["hxgd"].ToString());
-                            waitCar_temp.LBGD = drWaitCar["lbgd"].ToString() == "" ? 0 : int.Parse(drWaitCar["lbgd"].ToString());
-                            waitCar_temp.ZJ1 = drWaitCar["zj1"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj1"].ToString());
-                            waitCar_temp.ZJ2 = drWaitCar["zj2"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj2"].ToString());
-                            waitCar_temp.ZJ3 = drWaitCar["zj3"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj3"].ToString());
-                            waitCar_temp.ZJ4 = drWaitCar["zj4"].ToString() == "" ? 0 : int.Parse(drWaitCar["zj4"].ToString());
-                            waitCar_temp.ZBZL = drWaitCar["zbzl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zbzl"].ToString());
-                            waitCar_temp.SCZBZL = 0;
-                            waitCar_temp.ZDZZL = drWaitCar["zzl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zzl"].ToString());
-
-                            #region 确定检测项目
-                            ckLWH.Checked = (drWaitCar["clwkbz"].ToString() == "1");
-                            ckZJ.Checked = (drWaitCar["zjbz"].ToString() == "1");
-                            ckLB.Checked = (drWaitCar["lbjcbz"].ToString() == "1");
-                            ckHX.Checked = false;
-                            ckZBZL.Checked = (drWaitCar["zbzlbz"].ToString() == "1");
-                            #endregion
-
-                            //显示选中车辆信息
-                            UpdateRtb("主车待检车辆信息查询结果如下：\r\n车牌号：" + waitCar_temp.CLPH + "|检验流水号：" + waitCar_temp.WGJYH + "|检验次数：" + waitCar_temp.JCCS + "|检验类别：" + waitCar_temp.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                        "\r\n|外廓尺寸标准数据：" + waitCar_temp.CD.ToString() + "x" + waitCar_temp.KD.ToString() + "x" + waitCar_temp.GD.ToString() + "|整备质量：" + waitCar_temp.ZBZL);
-                            #endregion
-                            break;
-                        case NetUploadModel.广西:
-                            break;
-                        case NetUploadModel.海城新疆:
-                            break;
-                        case NetUploadModel.海城四川:
-                            break;
-                        case NetUploadModel.华燕:
-                            #region hy
-                            waitCar_temp.WGJYH = drWaitCar["jylsh"].ToString();
-                            waitCar_temp.JCCS = drWaitCar["jycs"].ToString();
-                            waitCar_temp.CLPH = drWaitCar["cph"].ToString();
-                            waitCar_temp.JCLX = waitCar_temp.CLPH == "" ? "1" : "0";
-                            waitCar_temp.HPYS = "";
-                            waitCar_temp.HPZL = drWaitCar["hpzlid"].ToString();
-                            waitCar_temp.FDJHM = drWaitCar["fdjh"].ToString();
-                            waitCar_temp.PPXH = drWaitCar["clpp"].ToString();
-                            waitCar_temp.VIN = drWaitCar["clsbdh"].ToString();
-                            waitCar_temp.CLLX = drWaitCar["cllx"].ToString() + drWaitCar["cllxstr"].ToString();
-                            waitCar_temp.CZ = drWaitCar["syr"].ToString();
-                            waitCar_temp.CD = int.Parse(drWaitCar["cwkc"].ToString());
-                            waitCar_temp.KD = int.Parse(drWaitCar["cwkk"].ToString());
-                            waitCar_temp.GD = int.Parse(drWaitCar["cwkg"].ToString());
-                            waitCar_temp.HXCD = 0;
-                            waitCar_temp.HXKD = 0;
-                            waitCar_temp.HXGD = 0;
-                            waitCar_temp.LBGD = 0;
-                            waitCar_temp.ZJ1 = 0;
-                            waitCar_temp.ZJ2 = 0;
-                            waitCar_temp.ZJ3 = 0;
-                            waitCar_temp.ZJ4 = 0;
-                            waitCar_temp.ZBZL = int.Parse(drWaitCar["zbzl"].ToString());
-                            waitCar_temp.SCZBZL = 0;
-                            waitCar_temp.ZDZZL = drWaitCar["zczl"].ToString() == "" ? 0 : int.Parse(drWaitCar["zczl"].ToString());
-
-                            #region 确定检测项目
-                            ckLWH.Checked = (drWaitCar["M1"].ToString() == "1");
-                            ckZBZL.Checked = (drWaitCar["Z1"].ToString() == "1");
-                            ckZJ.Checked = false;
-                            ckLB.Checked = false;
-                            ckHX.Checked = false;
-                            #endregion
-
-                            //显示选中车辆信息
-                            UpdateRtb("主车待检车辆信息查询结果如下：\r\n车牌号：" + waitCar_temp.CLPH + "|检验流水号：" + waitCar_temp.WGJYH + "|检验次数：" + waitCar_temp.JCCS + "|检验类别：" + waitCar_temp.JCLX == "0" ? "在用车检验" : "新车检验" +
-                                        "\r\n|外廓尺寸标准数据：" + waitCar_temp.CD.ToString() + "x" + waitCar_temp.KD.ToString() + "x" + waitCar_temp.GD.ToString() + "|整备质量：" + waitCar_temp.ZBZL);
-                            #endregion
-                            break;
-                        case NetUploadModel.湖北:
-                            break;
-                        case NetUploadModel.康士柏:
-                            break;
-                        case NetUploadModel.欧润特:
-                            break;
-                        case NetUploadModel.上饶:
-                            break;
-                        case NetUploadModel.南京新仕尚:
-                            break;
-                        case NetUploadModel.万国:
-                            break;
-                        case NetUploadModel.维科:
-                            break;
-                        case NetUploadModel.新盾:
-                            break;
-                        case NetUploadModel.新力源:
-                            break;
-                        case NetUploadModel.益中祥:
-                            break;
-                        case NetUploadModel.中航:
-                            break;
-                        default:
-                            break;
-                    }
-                    #endregion
+                    MessageBox.Show("未知联网列表模式");
+                    return;
                 }
 
-                #region 界面显示
-                lbJYLSH.Text = waitCar_temp.WGJYH;
-                lbJYLB.Text = waitCar_temp.JCLX == "0" ? "" : "";
-                lbCPHM.Text = waitCar_temp.CLPH;
-                lbHPZL.Text = waitCar_temp.HPZL;
-                lbVIN.Text = waitCar_temp.VIN;
-                lbCLLX.Text = waitCar_temp.CLLX;
-                lbLWHBZ.Text = waitCar_temp.CD.ToString() + " x " + waitCar_temp.KD.ToString() + " x " + waitCar_temp.GD.ToString();
-                lbHXBZ.Text = waitCar_temp.HXCD.ToString() + " x " + waitCar_temp.HXKD.ToString() + " x " + waitCar_temp.HXGD.ToString();
-                lbZJBZ.Text = waitCar_temp.ZJ1 + " | " + waitCar_temp.ZJ2 + " | " + waitCar_temp.ZJ3 + " | " + waitCar_temp.ZJ4;
-                lbLBBZ.Text = waitCar_temp.LBGD.ToString();
-                lbZBZLBZ.Text = waitCar_temp.ZBZL.ToString();
-                #endregion
-
-                return waitCar_temp;
+                ShowWaitCarList(WaitCarList);//刷新待检列表
             }
             catch (Exception er)
             {
-                IOControl.WriteLogs("更新查询到的待检车辆信息到发车待检车辆信息模板出错：\r\n" + er.Message);
-                return null;
+                MessageBox.Show("获取待检列表出错：" + er.Message);
             }
         }
-        
+        #endregion
+
         /// <summary>
-        /// 输入整备质量
+        /// 联网待检列表方式发车上线
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btInputZBZL_Click(object sender, EventArgs e)
+        private void btSendWaitListCarToTest_Click(object sender, EventArgs e)
         {
-            int zbzltemp = 0;
-            if (tbInputZbzl.Text != "" && int.TryParse(tbInputZbzl.Text, out zbzltemp) && zbzltemp > 0)
+            if (waitCarInfoZhu != null && waitCarInfoZhu.IsReadyToTest)
             {
-                waitCarInfoGua.QYCHP = zbzltemp.ToString();
-                pInputZBZL.Visible = false;
-                tbInputZbzl.Text = "";
+                waitCarInfoZhu.SFJCCKG = ckLWH_z.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCLBGD = ckLB_z.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCHX = ckHX_z.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCZJ = ckZJ_z.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCZBZL = ckZBZL_z.Checked ? "Y" : "N";
             }
             else
-                MessageBox.Show("请输入正确格式的整备质量数据！");
+            {
+                //主车信息为空时，不能开始检测
+                MessageBox.Show("待检车辆主车信息为空或不全，不能开始检测！");
+                return;
+            }
+
+            if (ckQGLC.Checked)
+            {
+                #region 牵挂联测，校验挂车信息是否齐全
+                if (waitCarInfoGua != null && waitCarInfoGua.IsReadyToTest)
+                {
+                    waitCarInfoGua.SFJCCKG = ckLWH_g.Checked ? "Y" : "N";
+                    waitCarInfoGua.SFJCLBGD = ckLB_g.Checked ? "Y" : "N";
+                    waitCarInfoGua.SFJCHX = ckHX_g.Checked ? "Y" : "N";
+                    waitCarInfoGua.SFJCZJ = ckZJ_g.Checked ? "Y" : "N";
+                    waitCarInfoGua.SFJCZBZL = ckZBZL_g.Checked ? "Y" : "N";
+                }
+                else
+                {
+                    //牵挂联测挂车车信息为空时，不能开始检测
+                    MessageBox.Show("待检挂车信息为空或不全，不能开始检测！");
+                    return;
+                }
+                #endregion
+            }
+
+            if (CreateWaitCarInfoFile())
+                MessageBox.Show("发车上线成功");
+        }
+
+        #region 联网待检列表刷新功能函数
+        /// <summary>
+        /// 更新待检列表显示
+        /// </summary>
+        /// <param name="wait_car_list"></param>
+        private void ShowWaitCarList(List<WaitCarModel> wait_car_list)
+        {
+            try
+            {
+                if (wait_car_list != null && wait_car_list.Count > 0)
+                {
+                    #region 更新待检列表显示
+                    for (int i = 0; i < wait_car_list.Count; i++)
+                    {
+                        WaitCarModel waicar = wait_car_list[i];
+                        DataRow dr_temp = dtDgvSource.NewRow();
+                        dr_temp["检验流水号"] = waicar.WGJYH;
+                        dr_temp["检验次数"] = waicar.JCCS;
+                        dr_temp["车辆号牌"] = waicar.CLPH;
+                        dr_temp["号牌种类"] = waicar.HPZL;
+                        dr_temp["外廓"] = waicar.SFJCCKG;
+                        dr_temp["称重"] = waicar.SFJCZBZL;
+                        dr_temp["长"] = waicar.CD;
+                        dr_temp["宽"] = waicar.KD;
+                        dr_temp["高"] = waicar.GD;
+                        dr_temp["整备质量"] = waicar.ZBZL;
+                        dr_temp["轴距"] = waicar.ZJ1+"/"+ waicar.ZJ2 + "/" + waicar.ZJ3 + "/" + waicar.ZJ4;
+                        
+                        dtDgvSource.Rows.Add(dr_temp);
+                    }
+                    #endregion
+
+                    dgvWaitCarList.DataSource = dtDgvSource;
+                }
+                else
+                    dtDgvSource.Rows.Clear();
+            }
+            catch (Exception er)
+            {
+                MessageBox.Show("刷新待检列表出错：" + er.Message);
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// 单车方式发车上线
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btSendSingleCarToTest_Click(object sender, EventArgs e)
+        {
+
         }
         
         /// <summary>
@@ -1491,129 +798,139 @@ namespace NetSendWaitCar
                 //先校验是否为牵挂联测，当前版本只允许在待检列表中选择挂车
                 if (waitCarInfoZhu != null && waitCarInfoZhu.IsReadyToTest)
                 {
-                    #region 写主车信息（同时先将挂车信息置为空）
-                    IOControl.WritePrivateProfileString("检测信息", "外观检验号", waitCarInfoZhu.WGJYH, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "是否检测长宽高", waitCarInfoZhu.SFJCCKG, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "是否检测栏板高度", waitCarInfoZhu.SFJCLBGD, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "是否检测轴距", waitCarInfoZhu.SFJCZJ, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "是否检测整备质量", waitCarInfoZhu.SFJCZBZL, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "是否检测货箱", waitCarInfoZhu.SFJCHX, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "车辆牌号", waitCarInfoZhu.CLPH, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "检测类型", waitCarInfoZhu.JCLX, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "号牌颜色", waitCarInfoZhu.HPYS, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "号牌种类", waitCarInfoZhu.HPZL, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "发动机号码", waitCarInfoZhu.FDJHM, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "品牌型号", waitCarInfoZhu.PPXH, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "检测次数", waitCarInfoZhu.JCCS, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "VIN", waitCarInfoZhu.VIN, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "车辆类型", waitCarInfoZhu.CLLX, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "车主", waitCarInfoZhu.CZ, CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "长度", waitCarInfoZhu.CD.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "宽度", waitCarInfoZhu.KD.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "高度", waitCarInfoZhu.GD.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "货箱长度", waitCarInfoZhu.HXCD.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "货箱宽度", waitCarInfoZhu.HXKD.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "货箱高度", waitCarInfoZhu.HXGD.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "轴距1", waitCarInfoZhu.ZJ1.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "轴距2", waitCarInfoZhu.ZJ2.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "轴距3", waitCarInfoZhu.ZJ3.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "轴距4", waitCarInfoZhu.ZJ4.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "整备质量", waitCarInfoZhu.ZBZL.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "实测整备质量", waitCarInfoZhu.SCZBZL.ToString(), CarInfoPathTemp);
-                    IOControl.WritePrivateProfileString("检测信息", "最大总质量", waitCarInfoZhu.ZDZZL.ToString(), CarInfoPathTemp);
+                    #region 写主车信息
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "外观检验号", waitCarInfoZhu.WGJYH, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测长宽高", waitCarInfoZhu.SFJCCKG, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测栏板高度", waitCarInfoZhu.SFJCLBGD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测轴距", waitCarInfoZhu.SFJCZJ, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测整备质量", waitCarInfoZhu.SFJCZBZL, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测货箱", waitCarInfoZhu.SFJCHX, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "车辆牌号", waitCarInfoZhu.CLPH, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "检测类型", waitCarInfoZhu.JCLX, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "号牌颜色", waitCarInfoZhu.HPYS, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "号牌种类", waitCarInfoZhu.HPZL, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "发动机号码", waitCarInfoZhu.FDJHM, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "品牌型号", waitCarInfoZhu.PPXH, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "检测次数", waitCarInfoZhu.JCCS, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "VIN", waitCarInfoZhu.VIN, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "车辆类型", waitCarInfoZhu.CLLX, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "车主", waitCarInfoZhu.CZ, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "长度", waitCarInfoZhu.CD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "宽度", waitCarInfoZhu.KD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "高度", waitCarInfoZhu.GD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "货箱长度", waitCarInfoZhu.HXCD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "货箱宽度", waitCarInfoZhu.HXKD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "货箱高度", waitCarInfoZhu.HXGD, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "轴数", waitCarInfoZhu.ZS, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "轴距1", waitCarInfoZhu.ZJ1, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "轴距2", waitCarInfoZhu.ZJ2, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "轴距3", waitCarInfoZhu.ZJ3, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "轴距4", waitCarInfoZhu.ZJ4, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "整备质量", waitCarInfoZhu.ZBZL, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "实测整备质量", waitCarInfoZhu.SCZBZL, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "最大总质量", waitCarInfoZhu.ZDZZL, CarInfoPathTemp);
 
-                    IOControl.WritePrivateProfileString("检测信息", "DaLeiJCFS", daleijcfs, CarInfoPathTemp);
-                    #endregion
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否安装尾板", waitCarInfoZhu.SFAZWB, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "尾板质量", waitCarInfoZhu.WBZL, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否有其他加装部件", waitCarInfoZhu.SFAZQTBJ, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "其他加装部件质量", waitCarInfoZhu.QTBJZL, CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "其他部件说明", waitCarInfoZhu.QTBJSM, CarInfoPathTemp);
 
-                    #region 再写挂车信息
-                    if (ckQGLC.Checked)
-                    {
-                        if (waitCarInfoGua != null && waitCarInfoGua.IsReadyToTest)
-                        {
-                            #region 写挂车信息
-                            IOControl.WritePrivateProfileString("检测信息", "主挂联测", "3", CarInfoPathTemp);
-
-                            IOControl.WritePrivateProfileString("检测信息", "挂车外观检验号", waitCarInfoGua.WGJYH, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "是否检测挂车外廓", waitCarInfoGua.SFJCCKG, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "是否检测挂车整备质量", waitCarInfoGua.SFJCZBZL, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "是否检测挂车栏板", waitCarInfoGua.SFJCLBGD, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "是否检测挂车轴距", waitCarInfoGua.SFJCZJ, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "是否检测挂车货箱", waitCarInfoGua.SFJCHX, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车号牌", waitCarInfoGua.CLPH, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车长", waitCarInfoGua.CD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车宽", waitCarInfoGua.KD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车高", waitCarInfoGua.GD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车轴距1", waitCarInfoGua.ZJ1.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车轴距2", waitCarInfoGua.ZJ2.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车轴距3", waitCarInfoGua.ZJ3.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车轴距4", waitCarInfoGua.ZJ4.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车检测类型", waitCarInfoGua.JCLX, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车号牌种类", waitCarInfoGua.HPZL, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车车辆类型", waitCarInfoGua.CLLX, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车检测次数", waitCarInfoGua.JCCS, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车厂牌型号", waitCarInfoGua.PPXH, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车发动机号码", waitCarInfoGua.FDJHM, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车车主", waitCarInfoGua.CZ, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车VIN", waitCarInfoGua.VIN, CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车整备质量", waitCarInfoGua.ZBZL.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车实测整备质量", waitCarInfoGua.SCZBZL.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车栏板高度", waitCarInfoGua.LBGD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车货箱长", waitCarInfoGua.HXCD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车货箱宽", waitCarInfoGua.HXKD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车货箱高", waitCarInfoGua.HXGD.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "挂车总质量", waitCarInfoGua.ZDZZL.ToString(), CarInfoPathTemp);
-                            IOControl.WritePrivateProfileString("检测信息", "牵引车号牌", waitCarInfoGua.QYCHP, CarInfoPathTemp);
-                            #endregion
-                        }
-                        else
-                        {
-                            UpdateRtb("牵挂联测时待下发挂车信息为空或异常，无法发车");
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        IOControl.WritePrivateProfileString("检测信息", "主挂联测", "1", CarInfoPathTemp);
-
-                        IOControl.WritePrivateProfileString("检测信息", "挂车外观检验号", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "是否检测挂车外廓", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "是否检测挂车整备质量", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "是否检测挂车栏板", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "是否检测挂车轴距", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "是否检测挂车货箱", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车号牌", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车长", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车宽", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车高", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车轴距1", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车轴距2", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车轴距3", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车轴距4", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车检测类型", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车号牌种类", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车车辆类型", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车检测次数", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车厂牌型号", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车发动机号码", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车车主", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车VIN", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车整备质量", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车实测整备质量", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车栏板高度", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车货箱长", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车货箱宽", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车货箱高", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "挂车总质量", "", CarInfoPathTemp);
-                        IOControl.WritePrivateProfileString("检测信息", "牵引车号牌", "", CarInfoPathTemp);
-                    }
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "DaLeiJCFS", daleijcfs, CarInfoPathTemp);
                     #endregion
                 }
                 else
                 {
-                    UpdateRtb("待检车辆主车信息为空或异常，无法发车");
+                    MessageBox.Show("待检车辆主车信息为空或异常，无法生成待检车辆信息");
                     return false;
                 }
-                
+
+                #region 再写挂车信息
+                if (pCarList.Visible && ckQGLC.Checked)
+                {
+                    if (waitCarInfoGua != null && waitCarInfoGua.IsReadyToTest)
+                    {
+                        #region 写挂车信息
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "主挂联测", "3", CarInfoPathTemp);
+
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车外观检验号", waitCarInfoGua.WGJYH, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车外廓", waitCarInfoGua.SFJCCKG, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车整备质量", waitCarInfoGua.SFJCZBZL, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车栏板", waitCarInfoGua.SFJCLBGD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车轴距", waitCarInfoGua.SFJCZJ, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车货箱", waitCarInfoGua.SFJCHX, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车号牌", waitCarInfoGua.CLPH, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车长", waitCarInfoGua.CD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车宽", waitCarInfoGua.KD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车高", waitCarInfoGua.GD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距1", waitCarInfoGua.ZJ1, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距2", waitCarInfoGua.ZJ2, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距3", waitCarInfoGua.ZJ3, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距4", waitCarInfoGua.ZJ4, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车检测类型", waitCarInfoGua.JCLX, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车号牌种类", waitCarInfoGua.HPZL, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车车辆类型", waitCarInfoGua.CLLX, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车检测次数", waitCarInfoGua.JCCS, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车厂牌型号", waitCarInfoGua.PPXH, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车发动机号码", waitCarInfoGua.FDJHM, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车车主", waitCarInfoGua.CZ, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车VIN", waitCarInfoGua.VIN, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车整备质量", waitCarInfoGua.ZBZL, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车实测整备质量", waitCarInfoGua.SCZBZL, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车栏板高度", waitCarInfoGua.LBGD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车货箱长", waitCarInfoGua.HXCD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车货箱宽", waitCarInfoGua.HXKD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车货箱高", waitCarInfoGua.HXGD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车总质量", waitCarInfoGua.ZDZZL, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "牵引车号牌", waitCarInfoGua.QYCHP, CarInfoPathTemp);
+                        #endregion
+                    }
+                    else
+                    {
+                        MessageBox.Show("牵挂联测时待下发挂车信息为空或异常，无法生成挂车待检车辆信息");
+                        return false;
+                    }
+                }
+                else
+                {
+                    #region 不检挂车时写入空白数据
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "主挂联测", "1", CarInfoPathTemp);
+
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车外观检验号", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车外廓", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车整备质量", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车栏板", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车轴距", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "是否检测挂车货箱", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车号牌", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车长", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车宽", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车高", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴数", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距1", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距2", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距3", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距4", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车检测类型", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车号牌种类", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车车辆类型", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车检测次数", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车厂牌型号", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车发动机号码", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车车主", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车VIN", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车整备质量", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车实测整备质量", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车栏板高度", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车货箱长", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车货箱宽", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车货箱高", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车总质量", "", CarInfoPathTemp);
+                    LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "牵引车号牌", "", CarInfoPathTemp);
+                    #endregion
+                }
+                #endregion
+
                 File.Copy(CarInfoPathTemp, CarInfoPath, true);//复制临时待检车辆信息到待检车辆信息
                 File.Delete(CarInfoPathTemp);
 
@@ -1621,10 +938,9 @@ namespace NetSendWaitCar
             }
             catch (Exception er)
             {
-                UpdateRtb("待检车辆信息下发检测程序出错：\r\n" + er.Message);
+                MessageBox.Show("生成待检车辆文件出错：\r\n" + er.Message);
                 return false;
             }
         }
-        #endregion
     }
 }

@@ -1,228 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LwhUploadOnline
 {
-    public class DataModel
-    {
-    }
-
-    /// <summary>
-    /// 联网待检车辆来源
-    /// </summary>
-    public enum NetWaitCarModel
-    {
-        联网查询,
-        大雷联网列表,
-        华燕联网列表
-    }
-
-    /// <summary>
-    /// 联网上传方式
-    /// </summary>
-    public enum NetUploadModel
-    {
-        安车,
-        安徽,
-        宝辉,
-        大雷,
-        广西,
-        海城新疆,
-        海城四川,
-        华燕,
-        湖北,
-        康士柏,
-        欧润特,
-        上饶,
-        南京新仕尚,
-        万国,
-        维科,
-        新盾,
-        新力源,
-        益中祥,
-        中航
-    }
-
-    /// <summary>
-    /// 联网地区
-    /// </summary>
-    public enum NetAreaModel
-    {
-        四川,
-        安徽,
-        福建,
-        贵州,
-        湖南,
-        江西,
-        新疆,
-        云南,
-        上海,
-        重庆,
-        成都,
-        自贡,
-        九江
-    }
-
-    /// <summary>
-    /// 联网配置信息
-    /// </summary>
-    public class UploadConfigModel
-    {
-        public UploadConfigModel()
-        {
-            WaitCarModel = NetWaitCarModel.联网查询;
-            JkdzWaitCar = "";
-            JkxlhWaitCar = "";
-
-
-            NetModel = NetUploadModel.安车;
-            NetArea = NetAreaModel.四川;
-            Jkdz = "";
-            LocalIP = "";
-            Xtlb = "18";
-            Jkxlh = "";
-            StationID = "";
-            LineID = "";
-            WkDeviceID = "1";
-            ZbzlDeviceID = "1";
-            WkFrontPicBh = "0360";
-            WkBackPicBh = "0361";
-            ZbzlFrontPicBh = "0362";
-            ZbzlBackPicBh = "0363";
-            PicSendTimes = 1;
-            CJBH = "";
-            DWMC = "";
-            DWJGDM = "";
-            YHBS = "";
-            YHXM = "";
-            ZDBS = "";
-        }
-
-        /// <summary>
-        /// 待检车辆来源
-        /// </summary>
-        public NetWaitCarModel WaitCarModel { get; set; }
-
-        /// <summary>
-        /// 联网接口地址（待检车辆）
-        /// </summary>
-        public string JkdzWaitCar { get; set; }
-
-        /// <summary>
-        /// 接口序列号（待检车辆）
-        /// </summary>
-        public string JkxlhWaitCar { get; set; }
-
-
-        /// <summary>
-        /// 联网上传模式
-        /// </summary>
-        public NetUploadModel NetModel { get; set; }
-
-        /// <summary>
-        /// 联网地区
-        /// </summary>
-        public NetAreaModel NetArea { get; set; }
-        
-        /// <summary>
-        /// 联网上传接口地址1
-        /// </summary>
-        public string Jkdz { get; set; }
-        
-        /// <summary>
-        /// 本机IP地址
-        /// </summary>
-        public string LocalIP { get; set; }
-
-        /// <summary>
-        /// 系统类别
-        /// </summary>
-        public string Xtlb { get; set; }
-        
-        /// <summary>
-        /// 接口序列号（联网上传）
-        /// </summary>
-        public string Jkxlh { get; set; }
-
-        /// <summary>
-        /// 检测站编号
-        /// </summary>
-        public string StationID { get; set; }
-
-        /// <summary>
-        /// 检测线号
-        /// </summary>
-        public string LineID { get; set; }
-
-        /// <summary>
-        /// 外廓工位号
-        /// </summary>
-        public string WkDeviceID { get; set; }
-
-        /// <summary>
-        /// 整备质量工位号
-        /// </summary>
-        public string ZbzlDeviceID { get; set; }
-
-        /// <summary>
-        /// 外廓前照代码
-        /// </summary>
-        public string WkFrontPicBh { get; set; }
-
-        /// <summary>
-        /// 外廓后照代码
-        /// </summary>
-        public string WkBackPicBh { get; set; }
-
-        /// <summary>
-        /// 整备质量前照代码
-        /// </summary>
-        public string ZbzlFrontPicBh { get; set; }
-
-        /// <summary>
-        /// 整备质量后照代码
-        /// </summary>
-        public string ZbzlBackPicBh { get; set; }
-
-        /// <summary>
-        /// 照片发送次数
-        /// </summary>
-        public int PicSendTimes { get; set; }
-
-        /// <summary>
-        /// 场景编号
-        /// </summary>
-        public string CJBH { get; set; }
-
-        /// <summary>
-        /// 单位名称
-        /// </summary>
-        public string DWMC { get; set; }
-
-        /// <summary>
-        /// 单位机构代码
-        /// </summary>
-        public string DWJGDM { get; set; }
-
-        /// <summary>
-        /// 用户标识
-        /// </summary>
-        public string YHBS { get; set; }
-
-        /// <summary>
-        /// 用户姓名
-        /// </summary>
-        public string YHXM { get; set; }
-
-        /// <summary>
-        /// 终端标识
-        /// </summary>
-        public string ZDBS { get; set; }
-    }
-    
+     
     /// <summary>
     /// 结果实体类
     /// </summary>
@@ -548,5 +333,63 @@ namespace LwhUploadOnline
         public int widthMax { set; get; }
         public int heightMin { set; get; }
         public int heightMax { set; get; }
+    }
+
+    public class recordModelControl
+    {
+        public static int getIntFromDb(DataRow dr, string columnName)
+        {
+            int temp = 0;
+            if (dr[columnName].ToString() == "")
+                return 0;
+            else if (int.TryParse(dr[columnName].ToString(), out temp))
+                return temp;
+            else
+                return 0;
+        }
+        public static bool getBoolFromDb(DataRow dr, string columnName)
+        {
+            if (dr[columnName].ToString() == "")
+                return false;
+            else if (dr[columnName].ToString() == "Y")
+                return true;
+            else
+                return false;
+        }
+        public static string IntToString(int value, string s = "")
+        {
+            if (value == 0)
+                return s;
+            else
+                return value.ToString();
+        }
+        public static int StringToInt(string value, int s = 0, string name = "")
+        {
+            try
+            {
+                if (value == "")
+                    return s;
+                else
+                    return int.Parse(value);
+            }
+            catch
+            {
+                throw (new Exception(name + "输入格式不正确"));
+            }
+        }
+        public static string StringToString(string value, string s = "")
+        {
+            if (value == "")
+                return s;
+            else
+                return value;
+        }
+        public static string BoolToString(bool value)
+        {
+            if (value)
+                return "Y";
+            else
+                return "N";
+        }
     }
 }

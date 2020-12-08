@@ -17,11 +17,11 @@ namespace NetLink
             InitializeComponent();
         }
 
-        private UploadConfigModel softConfig = new UploadConfigModel();
+        private LwhUploadOnline.UploadConfigModel softConfig = new LwhUploadOnline.UploadConfigModel();
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            UploadConfigModel temp = Config.getUploadConfig();
+            LwhUploadOnline.UploadConfigModel temp = LwhUploadOnline.configControl.getUploadConfig();
             if (temp != null)
             {
                 softConfig = temp;
@@ -49,8 +49,10 @@ namespace NetLink
             softConfig.YHBS = tbyhbs.Text;
             softConfig.ZDBS = tbzdbs.Text;
             softConfig.LocalIP = cbbLoaclIP.Text;
+            softConfig.WKDH = textBoxWkdh.Text;
+            softConfig.ZBZLDH = textBoxZBZLDH.Text;
 
-            if (Config.WriteBaseConfig(softConfig))
+            if (LwhUploadOnline.configControl.WriteBaseConfig(softConfig))
                 MessageBox.Show("保存成功");
             else
                 MessageBox.Show("保存失败");
@@ -58,16 +60,18 @@ namespace NetLink
 
         private void btSave2_Click(object sender, EventArgs e)
         {
-            softConfig.WaitCarModel = (NetWaitCarModel)cbbWaitCarModel.SelectedIndex;
+            softConfig.WaitCarModel = (LwhUploadOnline.NetWaitCarModel)cbbWaitCarModel.SelectedIndex;
             softConfig.JkxlhWaitCar = tbjkxlhWaitCar.Text;
             softConfig.JkdzWaitCar = tbjkdzWaitCar.Text;
-            softConfig.NetModel = (NetUploadModel)cbbUploadModel.SelectedIndex;
+            softConfig.NetModel = (LwhUploadOnline.NetUploadModel)cbbUploadModel.SelectedIndex;
             softConfig.Jkxlh = tbjkxlh.Text;
             softConfig.Jkdz = tbjkdz1.Text;
-            softConfig.NetArea = (NetAreaModel)cbblwdq.SelectedIndex;
+            softConfig.NetArea = (LwhUploadOnline.NetAreaModel)cbblwdq.SelectedIndex;
             softConfig.PicSendTimes = (int)nudPicUploadTimes.Value;
+            softConfig.dl_Send18Jxx = checkBoxDL_send18Jxx.Checked;
+            softConfig.dl_Send18H05 = checkBoxDL_send18H05.Checked;
 
-            if (Config.WriteNetConfig(softConfig))
+            if (LwhUploadOnline.configControl.WriteNetConfig(softConfig))
                 MessageBox.Show("保存成功");
             else
                 MessageBox.Show("保存失败");
@@ -93,6 +97,8 @@ namespace NetLink
                 tbyhbs.Text = softConfig.YHBS;
                 tbzdbs.Text = softConfig.ZDBS;
                 cbbLoaclIP.Text = softConfig.LocalIP;
+                textBoxWkdh.Text = softConfig.WKDH;
+                textBoxZBZLDH.Text = softConfig.ZBZLDH;
                 cbbWaitCarModel.SelectedIndex = (int)softConfig.WaitCarModel;
                 tbjkxlhWaitCar.Text = softConfig.JkxlhWaitCar;
                 tbjkdzWaitCar.Text = softConfig.JkdzWaitCar;
@@ -101,6 +107,9 @@ namespace NetLink
                 tbjkdz1.Text = softConfig.Jkdz;
                 cbblwdq.SelectedIndex = (int)softConfig.NetArea;
                 nudPicUploadTimes.Value = (decimal)softConfig.PicSendTimes;
+
+                checkBoxDL_send18Jxx.Checked= softConfig.dl_Send18Jxx;
+                checkBoxDL_send18H05.Checked= softConfig.dl_Send18H05;
             }
             catch { }
         }

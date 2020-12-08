@@ -205,7 +205,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AcprojectStart projectstart_ac = new AcprojectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            AcprojectStart projectstart_ac = new AcprojectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             if (ac_interface.writeProjectStart(projectstart_ac, out code, out message) && code == "1")
                                 message = "项目开始发送成功";
                             else
@@ -224,29 +224,13 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            dalei18C55 projectstart_dl = new dalei18C55(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            dalei18C55 projectstart_dl = new dalei18C55(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             dl_interface.writeProjectStart(projectstart_dl, out code, out message);
-
-                            dalei18J11 teststart_dl = new dalei18J11(model.LSH, model.CLHP, model.HPZL, model.VIN, "M1", softConfig.LineID, "0");
-                            dl_interface.write18J11(teststart_dl, out code_temp, out msg_temp);
-
-                            if (code == "1" && code_temp == "1")
-                                message = "发送项目开始/录像开始均成功";
-                            else if (code == "1" && code_temp != "1")
+                            if (softConfig.dl_Send18Jxx)
                             {
-                                code = "2";
-                                message = "发送项目开始成功/录像开始失败";
-                            }
-                            else if (code != "1" && code_temp == "1")
-                            {
-                                code = "2";
-                                message = "发送项目开始失败/录像开始成功";
-                            }
-                            else
-                            {
-                                code = "-7";
-                                message = "发送项目开始/录像开始均失败";
-                            }
+                                dalei18J11 teststart_dl = new dalei18J11(model.LSH, model.CLHP, model.HPZL, model.VIN, softConfig.WKDH, softConfig.LineID, "0");
+                                dl_interface.write18J11(teststart_dl, out code_temp, out msg_temp);
+                            }                            
                             #endregion
                             break;
                         case NetUploadModel.广西:
@@ -266,11 +250,11 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             hy_interface.writeProjectStart(projectstart_hy, out code, out message);
 
                             //再发录像开始  
-                            HyVideoStart videostart_hy = new HyVideoStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1");
+                            HyVideoStart videostart_hy = new HyVideoStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH);
                             hy_interface.writeVideoStart(videostart_hy, out code_temp, out msg_temp);
 
                             if (code == "1" && code_temp == "1")
@@ -394,7 +378,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), "M1", softConfig.WkFrontPicBh);
+                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.WKDH, softConfig.WkFrontPicBh);
                             if (ac_interface.writeOutlineCapturePicture(pic_ac, out code, out message) && code == "1")
                                 message = "外廓前照拍照命令发送成功";
                             else
@@ -413,9 +397,39 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                            dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, softConfig.WkFrontPicBh);
+                            dalei18J31 pic_dl2 = new dalei18J31(model.LSH, softConfig.StationID, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.WkFrontPicBh, "");
+                            for (int i = 0; i < softConfig.PicSendTimes; i++)
                             {
-                                dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1", softConfig.WkFrontPicBh);
+                                if (softConfig.dl_Send18Jxx)// if (softConfig.NetArea == NetAreaModel.四川)
+                                {
+                                    if (dl_interface.write18J31(pic_dl2, out code, out message) && code == "1")
+                                    {
+                                        message = "外廓前照拍照命令发送成功";
+                                        return;
+                                    }
+                                }
+                                else if (softConfig.dl_Send18H05)// else if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                                {
+                                    if (dl_interface.write18H05(pic_dl, out code, out message) && code == "1")
+                                    {
+                                        message = "外廓前照拍照命令发送成功";
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    code = "1";
+                                    message = "不要求发送外廓前照命令地区，跳过拍前照命令";
+                                    return;
+                                }
+                                code = "-7";
+                                message = "连续" + softConfig.PicSendTimes.ToString() + "次发送照片命令失败";
+                            }
+                            /*
+                            if (softConfig.dl_Send18H05)// (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                            {
+                                dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, softConfig.WkFrontPicBh);
                                 for (int i = 0; i < softConfig.PicSendTimes; i++)
                                 {
                                     if (dl_interface.write18H05(pic_dl, out code, out message) && code == "1")
@@ -432,7 +446,7 @@ namespace LwhUploadOnline
                             {
                                 code = "1";
                                 message = "不要求发送外廓前照命令地区，跳过拍前照命令";
-                            }
+                            }*/
                             #endregion
                             break;
                         case NetUploadModel.广西:
@@ -452,7 +466,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1", softConfig.WkFrontPicBh, "M1");
+                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, softConfig.WkFrontPicBh, softConfig.WKDH);
                             if (hy_interface.writeOutlineCapturePicture(pic_hy, out code, out message) && code == "1")
                                 message = "外廓前照拍照命令发送成功";
                             else
@@ -561,7 +575,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), "M1", softConfig.WkBackPicBh);
+                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.WKDH, softConfig.WkBackPicBh);
                             if (ac_interface.writeOutlineCapturePicture(pic_ac, out code, out message) && code == "1")
                                 message = "外廓后照拍照命令发送成功";
                             else
@@ -580,9 +594,39 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                            dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, softConfig.WkBackPicBh);
+                            dalei18J31 pic_dl2 = new dalei18J31(model.LSH, softConfig.StationID, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.WkBackPicBh, "");
+                            for (int i = 0; i < softConfig.PicSendTimes; i++)
                             {
-                                dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1", softConfig.WkBackPicBh);
+                                if (softConfig.dl_Send18Jxx)// if (softConfig.NetArea == NetAreaModel.四川)
+                                {
+                                    if (dl_interface.write18J31(pic_dl2, out code, out message) && code == "1")
+                                    {
+                                        message = "外廓后照拍照命令发送成功";
+                                        return;
+                                    }
+                                }
+                                else if (softConfig.dl_Send18H05)// else if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                                {
+                                    if (dl_interface.write18H05(pic_dl, out code, out message) && code == "1")
+                                    {
+                                        message = "外廓后照拍照命令发送成功";
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    code = "1";
+                                    message = "不要求发送外廓后照命令地区，跳过拍前照命令";
+                                    return;
+                                }
+                                code = "-7";
+                                message = "连续" + softConfig.PicSendTimes.ToString() + "次发送照片命令失败";
+                            }
+                            /*
+                            if (softConfig.dl_Send18H05)// if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                            {
+                                dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, softConfig.WkBackPicBh);
                                 for (int i = 0; i < softConfig.PicSendTimes; i++)
                                 {
                                     if (dl_interface.write18H05(pic_dl, out code, out message) && code == "1")
@@ -599,7 +643,7 @@ namespace LwhUploadOnline
                             {
                                 code = "1";
                                 message = "不要求发送外廓前照命令地区，跳过拍前照命令";
-                            }
+                            }*/
                             #endregion
                             break;
                         case NetUploadModel.广西:
@@ -619,7 +663,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1", softConfig.WkBackPicBh, "M2");
+                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, softConfig.WkBackPicBh, softConfig.WKDH);
                             if (hy_interface.writeOutlineCapturePicture(pic_hy, out code, out message) && code == "1")
                                 message = "外廓后照拍照命令发送成功";
                             else
@@ -729,7 +773,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            ActestDetailResult result_ac = new ActestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, "M1", result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "不合格" || result.WIDTHPD == "不合格" || result.HEIGHTPD == "不合格") ? "2" : "1");
+                            ActestDetailResult result_ac = new ActestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.WKDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "不合格" || result.WIDTHPD == "不合格" || result.HEIGHTPD == "不合格") ? "2" : "1");
                             if (ac_interface.writetestDetailResult(result_ac, out code, out message) && code == "1")
                                 message = "外廓检测结果发送成功";
                             else
@@ -759,7 +803,7 @@ namespace LwhUploadOnline
                             dl_interface.writeTestResult(result, out code1, out msg1);
 
                             //上传18C81
-                            daleitestDetailResult result_dl = new daleitestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, "M1", result.JCCS, result.LENGTHCLZ.ToString(), result.LENGTHPD == "不合格" ? "2" : "1", result.WIDTHCLZ.ToString(), result.WIDTHPD == "不合格" ? "2" : "1", result.HEIGHTCLZ.ToString(), result.HEIGHTPD == "不合格" ? "2" : "1", "0", "0", "0", "0", "0", "0", result.ZZJCLZ.ToString(), result.ZZJPD == "不合格" ? "2" : "1", (result.LENGTHPD == "不合格" || result.WIDTHPD == "不合格" || result.HEIGHTPD == "不合格") ? "2" : "1");
+                            daleitestDetailResult result_dl = new daleitestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.WKDH, result.JCCS, result.LENGTHCLZ.ToString(), result.LENGTHPD == "不合格" ? "2" : "1", result.WIDTHCLZ.ToString(), result.WIDTHPD == "不合格" ? "2" : "1", result.HEIGHTCLZ.ToString(), result.HEIGHTPD == "不合格" ? "2" : "1", "0", "0", "0", "0", "0", "0", result.ZZJCLZ.ToString(), result.ZZJPD == "不合格" ? "2" : "1", (result.LENGTHPD == "不合格" || result.WIDTHPD == "不合格" || result.HEIGHTPD == "不合格") ? "2" : "1");
                             dl_interface.writetestDetailResult(result_dl, out code, out message);
 
                             if (code == "1" && code1 == "1")
@@ -797,7 +841,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, "M1", result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
+                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.WKDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
                             if (hy_interface.writetestDetailResult(result_hy, out code, out message) && code == "1")
                                 message = "外廓检测结果发送成功";
                             else
@@ -907,7 +951,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AcprojectFinish projeckfinish = new AcprojectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                            AcprojectFinish projeckfinish = new AcprojectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
                             if (ac_interface.writeProjectFinish(projeckfinish, out code, out message) && code == "1")
                                 message = "项目开始发送成功";
                             else
@@ -926,31 +970,15 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            //发18J12
-                            dalei18J12 dl18j12 = new dalei18J12(model.LSH, model.CLHP, model.HPZL, model.VIN, "M1", softConfig.LineID, "0");
-                            dl_interface.write18J12(dl18j12, out code_temp, out msg_temp);
-
                             //发18C58
-                            dalei18C58 dlprojectfinish = new dalei18C58(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            dalei18C58 dlprojectfinish = new dalei18C58(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             dl_interface.writeProjectFinish(dlprojectfinish, out code, out message);
 
-
-                            if (code == "1" && code_temp == "1")
-                                message = "发送项目结束/录像结束均成功";
-                            else if (code == "1" && code_temp != "1")
+                            if (softConfig.dl_Send18Jxx)
                             {
-                                code = "2";
-                                message = "发送项目结束成功/录像结束失败";
-                            }
-                            else if (code != "1" && code_temp == "1")
-                            {
-                                code = "2";
-                                message = "发送项目结束失败/录像结束成功";
-                            }
-                            else
-                            {
-                                code = "-7";
-                                message = "发送项目结束/录像结束均失败";
+                                //发18J12
+                                dalei18J12 dl18j12 = new dalei18J12(model.LSH, model.CLHP, model.HPZL, model.VIN, softConfig.WKDH, softConfig.LineID, "0");
+                                dl_interface.write18J12(dl18j12, out code_temp, out msg_temp);
                             }
                             #endregion
                             break;
@@ -971,11 +999,11 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyVideoStop hyvideostop = new HyVideoStop(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1");
+                            HyVideoStop hyvideostop = new HyVideoStop(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH);
                             hy_interface.writeVideoStop(hyvideostop, out code_temp, out msg_temp);
 
                             //再发项目结束                           
-                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, "M1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             hy_interface.writeProjectFinish(hyprojectfinish, out code, out message);
 
                             if (code == "1" && code_temp == "1")
@@ -1100,7 +1128,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AcprojectStart projectstart_ac = new AcprojectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            AcprojectStart projectstart_ac = new AcprojectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             if (ac_interface.writeProjectStart(projectstart_ac, out code, out message) && code == "1")
                                 message = "整备质量项目开始发送成功";
                             else
@@ -1119,28 +1147,12 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            dalei18C55 projectstart_dl = new dalei18C55(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "M2", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            dalei18C55 projectstart_dl = new dalei18C55(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             dl_interface.writeProjectStart(projectstart_dl, out code, out message);
-
-                            dalei18J11 teststart_dl = new dalei18J11(model.LSH, model.CLHP, model.HPZL, model.VIN, "Z1", softConfig.LineID, "0");
-                            dl_interface.write18J11(teststart_dl, out code_temp, out msg_temp);
-
-                            if (code == "1" && code_temp == "1")
-                                message = "整备质量发送项目开始/录像开始均成功";
-                            else if (code == "1" && code_temp != "1")
+                            if (softConfig.dl_Send18Jxx)
                             {
-                                code = "2";
-                                message = "整备质量发送项目开始成功/录像开始失败";
-                            }
-                            else if (code != "1" && code_temp == "1")
-                            {
-                                code = "2";
-                                message = "整备质量发送项目开始失败/录像开始成功";
-                            }
-                            else
-                            {
-                                code = "-7";
-                                message = "整备质量发送项目开始/录像开始均失败";
+                                dalei18J11 teststart_dl = new dalei18J11(model.LSH, model.CLHP, model.HPZL, model.VIN, softConfig.ZBZLDH, softConfig.LineID, "0");
+                                dl_interface.write18J11(teststart_dl, out code_temp, out msg_temp);
                             }
                             #endregion
                             break;
@@ -1161,11 +1173,11 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             hy_interface.writeProjectStart(projectstart_hy, out code, out message);
 
                             //再发录像开始  
-                            HyVideoStart videostart_hy = new HyVideoStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "Z1");
+                            HyVideoStart videostart_hy = new HyVideoStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH);
                             hy_interface.writeVideoStart(videostart_hy, out code_temp, out msg_temp);
 
                             if (code == "1" && code_temp == "1")
@@ -1289,7 +1301,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), "Z1", softConfig.ZbzlFrontPicBh);
+                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.ZBZLDH, softConfig.ZbzlFrontPicBh);
                             if (ac_interface.writeOutlineCapturePicture(pic_ac, out code, out message) && code == "1")
                                 message = "整备质量前照拍照命令发送成功";
                             else
@@ -1308,11 +1320,11 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M2", softConfig.ZbzlFrontPicBh);
-                            dalei18J31 pic_dl2 = new dalei18J31(model.LSH, softConfig.StationID, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.ZbzlFrontPicBh, "");
+                            dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH, softConfig.ZbzlFrontPicBh);
+                            dalei18J31 pic_dl2 = new dalei18J31(model.LSH, softConfig.StationID, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.ZbzlFrontPicBh, "");
                             for (int i = 0; i < softConfig.PicSendTimes; i++)
                             {
-                                if (softConfig.NetArea == NetAreaModel.四川)
+                                if (softConfig.dl_Send18Jxx)// if (softConfig.NetArea == NetAreaModel.四川)
                                 {
                                     if (dl_interface.write18J31(pic_dl2, out code, out message) && code == "1")
                                     {
@@ -1320,7 +1332,7 @@ namespace LwhUploadOnline
                                         return;
                                     }
                                 }
-                                else if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                                else if (softConfig.dl_Send18H05)// else if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
                                 {
                                     if (dl_interface.write18H05(pic_dl, out code, out message) && code == "1")
                                     {
@@ -1329,12 +1341,11 @@ namespace LwhUploadOnline
                                     }
                                 }
                                 else
-                                {
+                                { 
                                     code = "1";
                                     message = "不要求发送整备质量前照命令地区，跳过拍前照命令";
                                     return;
                                 }
-
                                 code = "-7";
                                 message = "连续" + softConfig.PicSendTimes.ToString() + "次发送照片命令失败";
                             }
@@ -1357,7 +1368,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "Z1", softConfig.ZbzlFrontPicBh, "W1");
+                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH, softConfig.ZbzlFrontPicBh, "W1");
                             if (hy_interface.writeOutlineCapturePicture(pic_hy, out code, out message) && code == "1")
                                 message = "整备质量前照拍照命令发送成功";
                             else
@@ -1466,7 +1477,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), "Z1", softConfig.ZbzlBackPicBh);
+                            AccapturePicture pic_ac = new AccapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.ZBZLDH, softConfig.ZbzlBackPicBh);
                             if (ac_interface.writeOutlineCapturePicture(pic_ac, out code, out message) && code == "1")
                                 message = "整备质量后照拍照命令发送成功";
                             else
@@ -1485,12 +1496,12 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M2", softConfig.ZbzlBackPicBh);
-                            dalei18J31 pic_dl2 = new dalei18J31(model.LSH, softConfig.StationID, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.ZbzlBackPicBh, "");
+                            dalei18H05 pic_dl = new dalei18H05(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, "", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH, softConfig.ZbzlBackPicBh);
+                            dalei18J31 pic_dl2 = new dalei18J31(model.LSH, softConfig.StationID, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), softConfig.ZbzlBackPicBh, "");
 
                             for (int i = 0; i < softConfig.PicSendTimes; i++)
                             {
-                                if (softConfig.NetArea == NetAreaModel.四川)
+                                if(softConfig.dl_Send18Jxx)// (softConfig.NetArea == NetAreaModel.四川)
                                 {
                                     if (dl_interface.write18J31(pic_dl2, out code, out message) && code == "1")
                                     {
@@ -1498,7 +1509,7 @@ namespace LwhUploadOnline
                                         return;
                                     }
                                 }
-                                else if (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
+                                else if(softConfig.dl_Send18H05)// (softConfig.NetArea == NetAreaModel.安徽 || softConfig.NetArea == NetAreaModel.湖南 || softConfig.NetArea == NetAreaModel.云南 || softConfig.NetArea == NetAreaModel.重庆)
                                 {
                                     if (dl_interface.write18H05(pic_dl, out code, out message) && code == "1")
                                     {
@@ -1536,7 +1547,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1", softConfig.ZbzlBackPicBh, "M2");
+                            HyCapturePicture pic_hy = new HyCapturePicture(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH, softConfig.ZbzlBackPicBh, softConfig.ZBZLDH);
                             if (hy_interface.writeOutlineCapturePicture(pic_hy, out code, out message) && code == "1")
                                 message = "整备质量后照拍照命令发送成功";
                             else
@@ -1645,7 +1656,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            acZbzlDetailResult result_ac = new acZbzlDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, "Z1", result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.ZbzlDeviceID, result.SCZBZL.ToString(), result.ZBZLPD == "不合格 " ? "2" : "1");
+                            acZbzlDetailResult result_ac = new acZbzlDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.ZBZLDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.ZbzlDeviceID, result.SCZBZL.ToString(), result.ZBZLPD == "不合格 " ? "2" : "1");
                             if (ac_interface.writeZbzlTestDetailResult(result_ac, out code, out message) && code == "1")
                                 message = "整备质量检测结果发送成功";
                             else
@@ -1665,7 +1676,7 @@ namespace LwhUploadOnline
                         case NetUploadModel.大雷:
                             #region dl
                             //上传18C81
-                            daleizbzlDetailResult result_dl = new daleizbzlDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, "Z1", result.JCCS, result.SCZBZL.ToString(), result.ZBZLPD == "合格" ? "1" : "2");
+                            daleizbzlDetailResult result_dl = new daleizbzlDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.ZBZLDH, result.JCCS, result.SCZBZL.ToString(), result.ZBZLPD == "合格" ? "1" : "2");
                             if (dl_interface.writezbzlDetailResult(result_dl, out code, out message) && code == "1")
                                 message = "整备质量检测结果发送成功";
                             else
@@ -1689,7 +1700,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, "Z1", result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.ZbzlDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
+                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.ZBZLDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.ZbzlDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
                             if (hy_interface.writetestDetailResult(result_hy, out code, out message) && code == "1")
                                 message = "整备质量检测结果发送成功";
                             else
@@ -1799,7 +1810,7 @@ namespace LwhUploadOnline
                     {
                         case NetUploadModel.安车:
                             #region ac
-                            AcprojectFinish projeckfinish = new AcprojectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                            AcprojectFinish projeckfinish = new AcprojectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
                             if (ac_interface.writeProjectFinish(projeckfinish, out code, out message) && code == "1")
                                 message = "项目开始发送成功";
                             else
@@ -1818,31 +1829,15 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.大雷:
                             #region dl
-                            //发18J12
-                            dalei18J12 dl18j12 = new dalei18J12(model.LSH, model.CLHP, model.HPZL, model.VIN, "Z1", softConfig.LineID, "0");
-                            dl_interface.write18J12(dl18j12, out code_temp, out msg_temp);
-
+                            
                             //发18C58
-                            dalei18C58 dlprojectfinish = new dalei18C58(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "M2", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            dalei18C58 dlprojectfinish = new dalei18C58(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             dl_interface.writeProjectFinish(dlprojectfinish, out code, out message);
-
-
-                            if (code == "1" && code_temp == "1")
-                                message = "整备质量发送项目结束/录像结束均成功";
-                            else if (code == "1" && code_temp != "1")
+                            if (softConfig.dl_Send18Jxx)
                             {
-                                code = "2";
-                                message = "整备质量发送项目结束成功/录像结束失败";
-                            }
-                            else if (code != "1" && code_temp == "1")
-                            {
-                                code = "2";
-                                message = "整备质量发送项目结束失败/录像结束成功";
-                            }
-                            else
-                            {
-                                code = "-7";
-                                message = "整备质量发送项目结束/录像结束均失败";
+                                //发18J12
+                                dalei18J12 dl18j12 = new dalei18J12(model.LSH, model.CLHP, model.HPZL, model.VIN, softConfig.ZBZLDH, softConfig.LineID, "0");
+                                dl_interface.write18J12(dl18j12, out code_temp, out msg_temp);
                             }
                             #endregion
                             break;
@@ -1863,11 +1858,11 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyVideoStop hyvideostop = new HyVideoStop(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "M1");
+                            HyVideoStop hyvideostop = new HyVideoStop(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH);
                             hy_interface.writeVideoStop(hyvideostop, out code_temp, out msg_temp);
 
                             //再发项目结束                           
-                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, "Z1", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             hy_interface.writeProjectFinish(hyprojectfinish, out code, out message);
 
                             if (code == "1" && code_temp == "1")
@@ -1987,6 +1982,18 @@ namespace LwhUploadOnline
                 TestRecordModel model = getTestRecordModel(TestRecordJson);
                 if (model != null)
                 {
+                    string imagePathFront = model.FILEPATH + "\\" + model.RecordId + "_front.jpg";
+                    string imagePathBack = model.FILEPATH + "\\" + model.RecordId + "_back.jpg";
+                    string imagePathFrontLaser = model.FILEPATH + "\\" + model.RecordId + "_frontLaser.jpg";
+                    string imagePathTopLaser = model.FILEPATH + "\\" + model.RecordId + "_backLaser.jpg";
+                    string imagePathFrontZbzl = model.FILEPATH + "\\" + model.RecordId + "_frontZbzl.jpg";
+                    string imagePathBackZbzl = model.FILEPATH + "\\" + model.RecordId + "_backZbzl.jpg";
+                    imagePathFront = GlobalDiretory + "\\" + imagePathFront.Remove(0, 1);
+                    imagePathBack = GlobalDiretory + "\\" + imagePathBack.Remove(0, 1);
+                    imagePathFrontLaser = GlobalDiretory + "\\" + imagePathFrontLaser.Remove(0, 1);
+                    imagePathTopLaser = GlobalDiretory + "\\" + imagePathTopLaser.Remove(0, 1);
+                    imagePathFrontZbzl = GlobalDiretory + "\\" + imagePathFrontZbzl.Remove(0, 1);
+                    imagePathBackZbzl = GlobalDiretory + "\\" + imagePathBackZbzl.Remove(0, 1);
                     switch (softConfig.NetModel)
                     {
                         case NetUploadModel.安车:
@@ -2008,15 +2015,15 @@ namespace LwhUploadOnline
                         case NetUploadModel.大雷:
                             #region dl
                             string dl_code1 = "", dl_code2 = "", dl_code3 = "", dl_code4 = "", dl_code5 = "", dl_code6 = "", dl_msg1 = "", dl_msg2 = "", dl_msg3 = "", dl_msg4 = "", dl_msg5 = "", dl_msg6 = "";
-                            dalei18C63 photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, GlobalDiretory + "\\" + model.RecordId + "_front.jpg", model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss"), "M1", "0360");
+                            dalei18C63 photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, imagePathFront, model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, "0360");
                             if (model.LWHBJ)
                             {
-                                if (softConfig.NetArea == NetAreaModel.四川 || softConfig.NetArea == NetAreaModel.成都 || softConfig.NetArea == NetAreaModel.自贡 || softConfig.NetArea == NetAreaModel.江西)
+                                if (softConfig.dl_Send18Jxx)//(softConfig.NetArea == NetAreaModel.四川 || softConfig.NetArea == NetAreaModel.成都 || softConfig.NetArea == NetAreaModel.自贡 || softConfig.NetArea == NetAreaModel.江西)
                                 {
                                     //发0360、0361
                                     dl_interface.write18C63(photo_dl, out dl_code1, out dl_msg1);
 
-                                    photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, GlobalDiretory + "\\" + model.RecordId + "_back.jpg", model.JCKSSJ.ToString("yyyy-MM-dd HH:mm:ss"), "M1", "0361");
+                                    photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, imagePathBack, model.JCKSSJ.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, "0361");
                                     dl_interface.write18C63(photo_dl, out dl_code2, out dl_msg2);
                                 }
                                 else
@@ -2026,8 +2033,8 @@ namespace LwhUploadOnline
                                 }
 
                                 //发二维图60、62
-                                dl_interface.writeTestImage(model.LSH, model.CLHP, model.HPZL, model.VIN, GlobalDiretory + "\\" + model.RecordId + "_frontLaser.jpg", "60", out dl_code3, out dl_msg3);
-                                dl_interface.writeTestImage(model.LSH, model.CLHP, model.HPZL, model.VIN, GlobalDiretory + "\\" + model.RecordId + "_backLaser.jpg", "62", out dl_code4, out dl_msg4);
+                                dl_interface.writeTestImage(model.LSH, model.CLHP, model.HPZL, model.VIN, imagePathFrontLaser, "60", out dl_code3, out dl_msg3);
+                                dl_interface.writeTestImage(model.LSH, model.CLHP, model.HPZL, model.VIN,imagePathTopLaser, "62", out dl_code4, out dl_msg4);
                             }
                             else
                             {
@@ -2037,14 +2044,17 @@ namespace LwhUploadOnline
                                 dl_code4 = "1";
                             }
 
-                            if (model.ZBZLBJ && (softConfig.NetArea == NetAreaModel.四川 || softConfig.NetArea == NetAreaModel.成都 || softConfig.NetArea == NetAreaModel.自贡))
+                            if (model.ZBZLBJ)
                             {
                                 //发0362、0363
-                                photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, GlobalDiretory + "\\" + model.RecordId + "_frontZbzl.jpg", model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss"), "Z1", "0362");
-                                dl_interface.write18C63(photo_dl, out dl_code5, out dl_msg5);
+                                if (softConfig.dl_Send18Jxx)//
+                                {
+                                    photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, imagePathFrontZbzl, model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH, "0362");
+                                    dl_interface.write18C63(photo_dl, out dl_code5, out dl_msg5);
 
-                                photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, GlobalDiretory + "\\" + model.RecordId + "_backZbzl.jpg", model.JCJSSJ.ToString("yyyy-MM-dd HH:mm:ss"), "Z1", "0363");
-                                dl_interface.write18C63(photo_dl, out dl_code6, out dl_msg6);
+                                    photo_dl = new dalei18C63(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.CLHP, model.HPZL, model.VIN, imagePathBackZbzl, model.JCJSSJ.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.ZBZLDH, "0363");
+                                    dl_interface.write18C63(photo_dl, out dl_code6, out dl_msg6);
+                                }
                             }
                             else
                             {
@@ -2088,16 +2098,19 @@ namespace LwhUploadOnline
                         case NetUploadModel.华燕:
                             #region hy
                             string hy_code1 = "", hy_code2 = "", hy_code3 = "", hy_code4 = "", hy_msg1 = "", hy_msg2 = "", hy_msg3 = "", hy_msg4 = "";
-                            HyPhoto photo = new HyPhoto(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss"), "M1", "0360", GlobalDiretory + "\\" + model.RecordId + "_front.jpg");
+                            HyPhoto photo = new HyPhoto(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss"), softConfig.WKDH, "0360", GlobalDiretory + "\\" + model.RecordId + "_front.jpg");
                             if (model.LWHBJ)
                             {
                                 //发0360
+                                photo.pssj = model.JCKSSJ.ToString("yyyy-MM-dd HH:mm:ss");
+                                photo.zpzl = "0360";
+                                photo.zp = imagePathFront;
                                 hy_interface.writePhoto(photo, out hy_code1, out hy_msg1);
 
                                 //发0361
                                 photo.pssj = model.JCKSSJ.ToString("yyyy-MM-dd HH:mm:ss");
                                 photo.zpzl = "0361";
-                                photo.zp = GlobalDiretory + "\\" + model.RecordId + "_back.jpg";
+                                photo.zp = imagePathBack;
                                 hy_interface.writePhoto(photo, out hy_code2, out hy_msg2);
                             }
                             else
@@ -2109,16 +2122,16 @@ namespace LwhUploadOnline
                             if (model.ZBZLBJ)
                             {
                                 //发0362
-                                photo.jyxm = "Z1";
+                                photo.jyxm = softConfig.ZBZLDH;
                                 photo.pssj = model.JCSJ.ToString("yyyy-MM-dd HH:mm:ss");
                                 photo.zpzl = "0362";
-                                photo.zp = GlobalDiretory + "\\" + model.RecordId + "_frontZbzl.jpg";
+                                photo.zp = imagePathFrontZbzl;
                                 hy_interface.writePhoto(photo, out hy_code3, out hy_msg3);
 
                                 //发0363
                                 photo.pssj = model.JCJSSJ.ToString("yyyy-MM-dd HH:mm:ss");
                                 photo.zpzl = "0363";
-                                photo.zp = GlobalDiretory + "\\" + model.RecordId + "_backZbzl.jpg";
+                                photo.zp = imagePathBackZbzl;
                                 hy_interface.writePhoto(photo, out hy_code4, out hy_msg4);
                             }
                             else

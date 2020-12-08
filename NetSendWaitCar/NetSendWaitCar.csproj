@@ -47,14 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnChe.cs" />
-    <Compile Include="ancheInter.cs" />
-    <Compile Include="AnHui.cs" />
-    <Compile Include="AnHuiOutService.cs" />
-    <Compile Include="BaoHui.cs" />
-    <Compile Include="baohuiInter.cs" />
-    <Compile Include="DaLei.cs" />
-    <Compile Include="daleiInter.cs" />
     <Compile Include="DataModel.cs" />
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
@@ -62,40 +54,10 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="GongAn.cs" />
-    <Compile Include="gonganInter.cs" />
-    <Compile Include="GuangXi.cs" />
-    <Compile Include="HaiCheng.cs" />
-    <Compile Include="haichengInter.cs" />
-    <Compile Include="haichengWebClient.cs" />
-    <Compile Include="HuaYan.cs" />
-    <Compile Include="HuaYanCarTestHandleService.cs" />
-    <Compile Include="huayanInter.cs" />
-    <Compile Include="HuBei.cs" />
-    <Compile Include="hubeiInter.cs" />
-    <Compile Include="IOControl.cs" />
-    <Compile Include="KangShiBai.cs" />
-    <Compile Include="kangshibaiInter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetSysTime.cs" />
-    <Compile Include="ShangRao.cs" />
-    <Compile Include="shangraoInter.cs" />
-    <Compile Include="ShiShang.cs" />
-    <Compile Include="shishangInter.cs" />
-    <Compile Include="WanGuo.cs" />
-    <Compile Include="wanguoInter.cs" />
-    <Compile Include="WeiKe.cs" />
-    <Compile Include="weikeInter.cs" />
-    <Compile Include="XinDun.cs" />
-    <Compile Include="xindunInter.cs" />
-    <Compile Include="XinLiYuan.cs" />
-    <Compile Include="xinliyuanInter.cs" />
     <Compile Include="XmlOperation.cs" />
-    <Compile Include="YiZhongXiang.cs" />
-    <Compile Include="yizhongxiangInter.cs" />
-    <Compile Include="ZhongHang.cs" />
-    <Compile Include="zhonghangInter.cs" />
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -120,6 +82,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LwhUploadOnline\LwhUploadOnline.csproj">
+      <Project>{9e2a38fc-1e3b-4924-b728-74074ffcb4ca}</Project>
+      <Name>LwhUploadOnline</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NetLink\NetLink.csproj">
+      <Project>{b0bb4afc-e603-44a7-a2fe-774c4827aa5f}</Project>
+      <Name>NetLink</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

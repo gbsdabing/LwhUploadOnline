@@ -52,6 +52,7 @@
     <Compile Include="AnHuiOutService.cs" />
     <Compile Include="BaoHui.cs" />
     <Compile Include="baohuiInter.cs" />
+    <Compile Include="configcontrol.cs" />
     <Compile Include="DaLei.cs" />
     <Compile Include="daleiInter.cs" />
     <Compile Include="DataModel.cs" />
