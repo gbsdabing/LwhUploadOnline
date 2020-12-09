@@ -297,7 +297,6 @@ namespace NetSendWaitCar
                         case LwhUploadOnline.NetUploadModel.安车:
                             #region ac
                             dt_WaitCar = ac_interface.GetVehicleInf(tbHPHM.Text, cbbHPZL.Text, tbVIN.Text, out code, out msg);
-
                             if (dt_WaitCar != null && dt_WaitCar.Rows.Count > 0)
                             {
                                 DataRow drWaitCar = dt_WaitCar.Rows[0];
@@ -334,6 +333,8 @@ namespace NetSendWaitCar
                                 waitcar_single.SFAZQTBJ = "";
                                 waitcar_single.QTBJZL = "";
                                 waitcar_single.QTBJSM = "";
+
+                                waitcar_single.IsReadyToTest = true;
                             }
                             else
                             {
@@ -348,7 +349,61 @@ namespace NetSendWaitCar
                             break;
                         case LwhUploadOnline.NetUploadModel.大雷:
                             #region dl
+                            dt_WaitCar = dl_interface.GetVehicleInf(tbHPHM.Text, cbbHPZL.Text, tbJYLSH.Text, out code, out msg);
+                            if (dt_WaitCar != null && dt_WaitCar.Rows.Count > 0)
+                            {
+                                DataRow dr_temp = dt_WaitCar.Rows[0];
+                                waitcar_single.WGJYH = dr_temp["jylsh"].ToString();
+                                waitcar_single.JCCS = dr_temp["hphm"].ToString();
+                                waitcar_single.CLPH = dr_temp["cph"].ToString();
+                                waitcar_single.JCLX = dr_temp["jylb"].ToString() == "00" ? "1" : "0";
+                                waitcar_single.HPYS = "";
+                                waitcar_single.HPZL = dr_temp["hpzl"].ToString();
+                                waitcar_single.FDJHM = dr_temp["fdjh"].ToString();
+                                waitcar_single.PPXH = dr_temp["clpp"].ToString();
+                                waitcar_single.VIN = dr_temp["clsbdh"].ToString();
+                                waitcar_single.CLLX = dr_temp["cllx"].ToString();
+                                waitcar_single.CZ = dr_temp["syr"].ToString();
+                                waitcar_single.CD = dr_temp["cwkc"].ToString();
+                                waitcar_single.KD = dr_temp["cwkk"].ToString();
+                                waitcar_single.GD = dr_temp["cwkg"].ToString();
+                                waitcar_single.HXCD = dr_temp["hxcd"].ToString() == "" ? "0" : dr_temp["hxcd"].ToString();
+                                waitcar_single.HXKD = dr_temp["hxkd"].ToString() == "" ? "0" : dr_temp["hxkd"].ToString();
+                                waitcar_single.HXGD = dr_temp["hxgd"].ToString() == "" ? "0" : dr_temp["hxgd"].ToString();
+                                waitcar_single.LBGD = dr_temp["lbgd"].ToString() == "" ? "0" : dr_temp["lbgd"].ToString();
+                                waitcar_single.ZS = dr_temp["czs"].ToString() == "" ? "0" : dr_temp["czs"].ToString();
+                                waitcar_single.ZJ1 = dr_temp["zj1"].ToString() == "" ? "0" : dr_temp["zj1"].ToString();
+                                waitcar_single.ZJ2 = dr_temp["zj2"].ToString() == "" ? "0" : dr_temp["zj2"].ToString();
+                                waitcar_single.ZJ3 = dr_temp["zj3"].ToString() == "" ? "0" : dr_temp["zj3"].ToString();
+                                waitcar_single.ZJ4 = dr_temp["zj4"].ToString() == "" ? "0" : dr_temp["zj4"].ToString();
+                                waitcar_single.ZBZL = dr_temp["zbzl"].ToString() == "" ? "0" : dr_temp["zbzl"].ToString();
+                                waitcar_single.SCZBZL = "0";
+                                waitcar_single.ZDZZL = dr_temp["zzl"].ToString() == "" ? "0" : dr_temp["zzl"].ToString();
 
+                                if (dt_WaitCar.Columns.Contains("qychp"))
+                                    waitcar_single.QYCHP = dr_temp["qychp"].ToString();
+                                else
+                                    waitcar_single.QYCHP = "";
+
+                                waitcar_single.SFAZWB = "";
+                                waitcar_single.WBZL = "";
+                                waitcar_single.SFAZQTBJ = "";
+                                waitcar_single.QTBJZL = "";
+                                waitcar_single.QTBJSM = "";
+
+                                waitcar_single.SFJCCKG = (dr_temp["clwkbz"].ToString() == "1" ? "Y" : "N");
+                                waitcar_single.SFJCZJ = (dr_temp["zjbz"].ToString() == "1" ? "Y" : "N");
+                                waitcar_single.SFJCLBGD = (dr_temp["lbjcbz"].ToString() == "1" ? "Y" : "N");
+                                waitcar_single.SFJCHX = "N";
+                                waitcar_single.SFJCZBZL = (dr_temp["zbzlbz"].ToString() == "1" ? "Y" : "N");
+
+                                waitcar_single.IsReadyToTest = true;
+                            }
+                            else
+                            {
+                                MessageBox.Show("待检列表查询失败或未查到待检车辆");
+                                return;
+                            }
                             #endregion
                             break;
                         case LwhUploadOnline.NetUploadModel.广西:
@@ -359,7 +414,56 @@ namespace NetSendWaitCar
                             break;
                         case LwhUploadOnline.NetUploadModel.华燕:
                             #region hy
+                            dt_WaitCar = hy_interface.GetVehicleInf(tbJYLSH.Text, tbJYCS.Text, "M1", out code, out msg);
+                            if (dt_WaitCar != null && dt_WaitCar.Rows.Count > 0)
+                            {
+                                DataRow drWaitCar = dt_WaitCar.Rows[0];                                
+                                waitcar_single.WGJYH = drWaitCar["jylsh"].ToString();
+                                waitcar_single.JCCS = drWaitCar["jycs"].ToString();
+                                waitcar_single.CLPH = drWaitCar["cph"].ToString();
+                                waitcar_single.JCLX = waitcar_single.CLPH == "" ? "1" : "0";
+                                waitcar_single.HPYS = "";
+                                waitcar_single.HPZL = drWaitCar["hpzlid"].ToString() + "_" + drWaitCar["hpzl"].ToString();
+                                waitcar_single.FDJHM = drWaitCar["fdjh"].ToString();
+                                waitcar_single.PPXH = drWaitCar["clpp"].ToString();
+                                waitcar_single.VIN = drWaitCar["clsbdh"].ToString();
+                                waitcar_single.CLLX = drWaitCar["cllx"].ToString() + drWaitCar["cllxstr"].ToString();
+                                waitcar_single.CZ = drWaitCar["syr"].ToString();
+                                waitcar_single.CD = drWaitCar["cwkc"].ToString();
+                                waitcar_single.KD = drWaitCar["cwkk"].ToString();
+                                waitcar_single.GD = drWaitCar["cwkg"].ToString();
+                                waitcar_single.HXCD = "0";
+                                waitcar_single.HXKD = "0";
+                                waitcar_single.HXGD = "0";
+                                waitcar_single.LBGD = "0";
+                                waitcar_single.ZJ1 = "0";
+                                waitcar_single.ZJ2 = "0";
+                                waitcar_single.ZJ3 = "0";
+                                waitcar_single.ZJ4 = "0";
+                                waitcar_single.ZBZL = drWaitCar["zbzl"].ToString();
+                                waitcar_single.SCZBZL = "0";
+                                waitcar_single.ZDZZL = drWaitCar["zczl"].ToString() == "" ? "0" : drWaitCar["zczl"].ToString();
 
+                                waitcar_single.QYCHP = "";
+                                waitcar_single.SFAZWB = "";
+                                waitcar_single.WBZL = "";
+                                waitcar_single.SFAZQTBJ = "";
+                                waitcar_single.QTBJZL = "";
+                                waitcar_single.QTBJSM = "";
+
+                                waitcar_single.SFJCCKG = "Y";
+                                waitcar_single.SFJCZJ = "N";
+                                waitcar_single.SFJCLBGD = "N";
+                                waitcar_single.SFJCHX = "N";
+                                waitcar_single.SFJCZBZL = "N";
+
+                                waitcar_single.IsReadyToTest = true;
+                            }
+                            else
+                            {
+                                MessageBox.Show("查询待检车辆信息失败：" + msg);
+                                return;
+                            }
                             #endregion
                             break;
                         case LwhUploadOnline.NetUploadModel.湖北:
@@ -649,7 +753,11 @@ namespace NetSendWaitCar
                             wait_temp.SCZBZL = "0";
                             wait_temp.ZDZZL = dr_temp["zzl"].ToString() == "" ? "0" : dr_temp["zzl"].ToString();
 
-                            wait_temp.QYCHP = "";
+                            if (dt_WaitCarList.Columns.Contains("qychp"))
+                                wait_temp.QYCHP = dr_temp["qychp"].ToString();
+                            else
+                                wait_temp.QYCHP = "";
+
                             wait_temp.SFAZWB = "";
                             wait_temp.WBZL = "";
                             wait_temp.SFAZQTBJ = "";
@@ -784,7 +892,24 @@ namespace NetSendWaitCar
         /// <param name="e"></param>
         private void btSendSingleCarToTest_Click(object sender, EventArgs e)
         {
+            if (waitCarInfoZhu != null && waitCarInfoZhu.IsReadyToTest)
+            {
+                waitCarInfoZhu.SFJCCKG = ckLWH_s.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCLBGD = ckLB_s.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCHX = ckHX_s.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCZJ = ckZJ_s.Checked ? "Y" : "N";
+                waitCarInfoZhu.SFJCZBZL = ckZBZL_s.Checked ? "Y" : "N";
+            }
+            else
+            {
+                //主车信息为空时，不能开始检测
+                MessageBox.Show("待检车辆主车信息为空或不全，不能开始检测！");
+                return;
+            }
 
+            //发车上线
+            if (CreateWaitCarInfoFile())
+                MessageBox.Show("发车上线成功");
         }
         
         /// <summary>

@@ -56,7 +56,10 @@ namespace LwhUploadOnline
             try
             {
                 #region 读取联网上传陪着信息
-                if (getUploadConfig(ref softConfig) == false)
+                UploadConfigModel temp = configControl.getUploadConfig();
+                if (temp != null)
+                    softConfig = temp;
+                else
                 {
                     code = "-2";
                     message = "获取联网配置信息失败";
@@ -2238,103 +2241,6 @@ namespace LwhUploadOnline
         #endregion
 
         #region 内部功能函数
-        /// <summary>
-        /// 获取联网软件配置信息
-        /// </summary>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        private bool getUploadConfig(ref UploadConfigModel config)
-        {
-            try
-            {
-                config = new UploadConfigModel();
-
-                string config_path = @"D:\外廓数据文件\uploadConfig.ini";
-                StringBuilder temp = new StringBuilder();
-                temp.Length = 2048;
-                int i = 0;
-                
-                IOControl.GetPrivateProfileString("联网配置", "联网模式", "0", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i))
-                    config.NetModel = (NetUploadModel)i;
-                else
-                    config.NetModel = NetUploadModel.安车;
-
-                IOControl.GetPrivateProfileString("联网配置", "联网地区", "0", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i))
-                    config.NetArea = (NetAreaModel)i;
-                else
-                    config.NetArea = NetAreaModel.四川;
-                
-                IOControl.GetPrivateProfileString("联网配置", "接口地址", "", temp, 2048, config_path);
-                config.Jkdz = temp.ToString().Trim();
-                                
-                IOControl.GetPrivateProfileString("联网配置", "接口序列号", "", temp, 2048, config_path);
-                config.Jkxlh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "本机IP地址", "", temp, 2048, config_path);
-                config.LocalIP = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "系统类别", "", temp, 2048, config_path);
-                config.Xtlb = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "检测站编号", "", temp, 2048, config_path);
-                config.StationID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "检测线编号", "", temp, 2048, config_path);
-                config.LineID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "外廓工位号", "", temp, 2048, config_path);
-                config.WkDeviceID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "整备质量工位号", "", temp, 2048, config_path);
-                config.ZbzlDeviceID = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "外廓前照编号", "", temp, 2048, config_path);
-                config.WkFrontPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "外廓后照编号", "", temp, 2048, config_path);
-                config.WkBackPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "整备质量前照编号", "", temp, 2048, config_path);
-                config.ZbzlFrontPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "整备质量后照编号", "", temp, 2048, config_path);
-                config.ZbzlBackPicBh = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "照片上传次数", "", temp, 2048, config_path);
-                if (int.TryParse(temp.ToString().Trim(), out i) && i > 0)
-                    config.PicSendTimes = i;
-                else
-                    config.PicSendTimes = 1;
-
-                IOControl.GetPrivateProfileString("联网配置", "场景编号", "", temp, 2048, config_path);
-                config.CJBH = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "单位名称", "", temp, 2048, config_path);
-                config.DWMC = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "单位机构代码", "", temp, 2048, config_path);
-                config.DWJGDM = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "用户标识", "", temp, 2048, config_path);
-                config.YHBS = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "用户姓名", "", temp, 2048, config_path);
-                config.YHXM = temp.ToString().Trim();
-
-                IOControl.GetPrivateProfileString("联网配置", "终端标识", "", temp, 2048, config_path);
-                config.ZDBS = temp.ToString().Trim();
-
-                return true;
-            }
-            catch (Exception er)
-            {
-                IOControl.WriteLogs("获取联网配置出错：" + er.Message);
-                return false;
-            }
-        }
-
         /// <summary>
         /// 解析Json数据为TestRecordModel类
         /// </summary>

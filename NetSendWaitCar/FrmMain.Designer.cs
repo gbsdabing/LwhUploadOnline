@@ -326,6 +326,7 @@
             this.dgvWaitCarList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgvWaitCarList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvWaitCarList.ColumnHeadersVisible = false;
+            this.dgvWaitCarList.ContextMenuStrip = this.contextMenuStrip1;
             this.dgvWaitCarList.Location = new System.Drawing.Point(1, 1);
             this.dgvWaitCarList.Name = "dgvWaitCarList";
             this.dgvWaitCarList.ReadOnly = true;
@@ -667,7 +668,7 @@
             this.pCarSingle.Controls.Add(this.label25);
             this.pCarSingle.Controls.Add(this.lbJYLB);
             this.pCarSingle.Controls.Add(this.label27);
-            this.pCarSingle.Location = new System.Drawing.Point(4, 272);
+            this.pCarSingle.Location = new System.Drawing.Point(2, 121);
             this.pCarSingle.Name = "pCarSingle";
             this.pCarSingle.Size = new System.Drawing.Size(578, 540);
             this.pCarSingle.TabIndex = 2;
@@ -975,8 +976,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(582, 656);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.pCarList);
             this.Controls.Add(this.pCarSingle);
+            this.Controls.Add(this.pCarList);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
