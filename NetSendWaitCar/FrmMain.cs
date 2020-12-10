@@ -69,7 +69,11 @@ namespace NetSendWaitCar
             InitializeComponent();
             pCarList.Location = new Point(2, 116);
             pCarSingle.Location = new Point(2, 116);
-            this.StartPosition = FormStartPosition.CenterScreen;
+
+            this.StartPosition = FormStartPosition.Manual;
+            Rectangle rect = Screen.PrimaryScreen.Bounds;
+            this.Left = rect.Width - this.Width - 20;
+            this.Top = rect.Height - this.Height - 50;
         }
 
         private void FrmMain1_Load(object sender, EventArgs e)
@@ -414,7 +418,7 @@ namespace NetSendWaitCar
                             break;
                         case LwhUploadOnline.NetUploadModel.华燕:
                             #region hy
-                            dt_WaitCar = hy_interface.GetVehicleInf(tbJYLSH.Text, tbJYCS.Text, "M1", out code, out msg);
+                            dt_WaitCar = hy_interface.GetVehicleInf(tbJYLSH.Text, tbJYCS.Text, "M1", "1", out code, out msg);
                             if (dt_WaitCar != null && dt_WaitCar.Rows.Count > 0)
                             {
                                 DataRow drWaitCar = dt_WaitCar.Rows[0];                                
@@ -445,8 +449,8 @@ namespace NetSendWaitCar
                                 waitcar_single.ZDZZL = drWaitCar["zczl"].ToString() == "" ? "0" : drWaitCar["zczl"].ToString();
 
                                 waitcar_single.QYCHP = "";
-                                waitcar_single.SFAZWB = "";
-                                waitcar_single.WBZL = "";
+                                waitcar_single.SFAZWB = drWaitCar["sfazwb"].ToString() == "1" ? "Y" : "N";
+                                waitcar_single.WBZL = drWaitCar["wbzl"].ToString();
                                 waitcar_single.SFAZQTBJ = "";
                                 waitcar_single.QTBJZL = "";
                                 waitcar_single.QTBJSM = "";
@@ -522,6 +526,8 @@ namespace NetSendWaitCar
                     ckLB_s.Checked = waitCarInfoZhu.SFJCLBGD == "Y";
                     ckHX_s.Checked = waitCarInfoZhu.SFJCHX == "Y";
                     ckZBZL_s.Checked = waitCarInfoZhu.SFJCZBZL == "Y";
+
+                    btSendSingleCarToTest.Enabled = true;
                 }
                 #endregion
             }
@@ -530,18 +536,24 @@ namespace NetSendWaitCar
         #region 联网待检列表右键功能
         private void 单车发车上线ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (dgvWaitCarList.Rows.Count < 1)
+            {
+                MessageBox.Show("当前无待检车辆数据，请先刷新待检列表查到待检车辆数据后再操作");
+                return;
+            }
             try
             {
                 if (dgvWaitCarList.CurrentRow.Index > -1)
                 {
-                    string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
-                    string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
+                    string jylsh = dgvWaitCarList.CurrentRow.Cells["检验流水号"].Value.ToString();
+                    string jycs = dgvWaitCarList.CurrentRow.Cells["检验次数"].Value.ToString();
 
                     for (int i = 0; i < WaitCarList.Count; i++)
                     {
                         if (WaitCarList[i].WGJYH == jylsh && WaitCarList[i].JCCS == jycs)
                         {
                             waitCarInfoZhu = WaitCarList[i];
+                            waitCarInfoZhu.IsReadyToTest = true;
                             ckQGLC.Checked = false;
 
                             if (CreateWaitCarInfoFile())
@@ -562,12 +574,17 @@ namespace NetSendWaitCar
 
         private void 设为待检主车ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (dgvWaitCarList.Rows.Count < 1)
+            {
+                MessageBox.Show("当前无待检车辆数据，请先刷新待检列表查到待检车辆数据后再操作");
+                return;
+            }
             try
             {
                 if (dgvWaitCarList.CurrentRow.Index > -1)
                 {
-                    string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
-                    string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
+                    string jylsh = dgvWaitCarList.CurrentRow.Cells["检验流水号"].Value.ToString();
+                    string jycs = dgvWaitCarList.CurrentRow.Cells["检验次数"].Value.ToString();
 
                     for (int i = 0; i < WaitCarList.Count; i++)
                     {
@@ -583,6 +600,9 @@ namespace NetSendWaitCar
                             ckLB_z.Checked = waitCarInfoZhu.SFJCLBGD == "Y";
                             ckHX_z.Checked = waitCarInfoZhu.SFJCHX == "Y";
                             ckZBZL_z.Checked = waitCarInfoZhu.SFJCZBZL == "Y";
+
+                            waitCarInfoZhu.IsReadyToTest = true;
+                            btSendWaitListCarToTest.Enabled = true;
 
                             return;
                         }
@@ -603,12 +623,17 @@ namespace NetSendWaitCar
 
         private void 设为待检挂车ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (dgvWaitCarList.Rows.Count < 1)
+            {
+                MessageBox.Show("当前无待检车辆数据，请先刷新待检列表查到待检车辆数据后再操作");
+                return;
+            }
             try
             {
                 if (dgvWaitCarList.CurrentRow.Index > -1)
                 {
-                    string jylsh = dgvWaitCarList.CurrentRow.Cells["jylsh"].Value.ToString();
-                    string jycs = dgvWaitCarList.CurrentRow.Cells["jycs"].Value.ToString();
+                    string jylsh = dgvWaitCarList.CurrentRow.Cells["检验流水号"].Value.ToString();
+                    string jycs = dgvWaitCarList.CurrentRow.Cells["检验次数"].Value.ToString();
 
                     for (int i = 0; i < WaitCarList.Count; i++)
                     {
@@ -625,6 +650,7 @@ namespace NetSendWaitCar
                             ckHX_g.Checked = waitCarInfoGua.SFJCHX == "Y";
                             ckZBZL_g.Checked = waitCarInfoGua.SFJCZBZL == "Y";
 
+                            waitCarInfoGua.IsReadyToTest = true;
                             return;
                         }
                     }
@@ -646,6 +672,7 @@ namespace NetSendWaitCar
         {
             try
             {
+                WaitCarList.Clear();
                 DataTable dt_WaitCarList = null;
                 if (softConfig.WaitCarModel == LwhUploadOnline.NetWaitCarModel.华燕联网列表)
                 {
@@ -658,9 +685,9 @@ namespace NetSendWaitCar
                             DataTable dt_carinfo_hy = null;
                             string code = "", msg = "";
                             if (dt_WaitCarList.Rows[i]["M1"].ToString() == "1")
-                                dt_carinfo_hy = hy_interface.GetVehicleInf(dt_WaitCarList.Rows[i]["jylsh"].ToString(), dt_WaitCarList.Rows[i]["jycs"].ToString(), "M1", out code, out msg);
+                                dt_carinfo_hy = hy_interface.GetVehicleInf(dt_WaitCarList.Rows[i]["jylsh"].ToString(), dt_WaitCarList.Rows[i]["jycs"].ToString(), "M1", "1", out code, out msg);
                             else
-                                dt_carinfo_hy = hy_interface.GetVehicleInf(dt_WaitCarList.Rows[i]["jylsh"].ToString(), dt_WaitCarList.Rows[i]["jycs"].ToString(), "M1", out code, out msg);
+                                dt_carinfo_hy = hy_interface.GetVehicleInf(dt_WaitCarList.Rows[i]["jylsh"].ToString(), dt_WaitCarList.Rows[i]["jycs"].ToString(), "M1", "1", out code, out msg);
 
                             if (code == "1" && dt_carinfo_hy != null && dt_carinfo_hy.Rows.Count > 0)
                             {
@@ -671,11 +698,11 @@ namespace NetSendWaitCar
                                 wait_temp.CLPH = dr_temp["cph"].ToString();
                                 wait_temp.JCLX = wait_temp.CLPH == "" ? "1" : "0";
                                 wait_temp.HPYS = "";
-                                wait_temp.HPZL = dr_temp["hpzlid"].ToString() + "_" + dr_temp["hpzl"].ToString();
+                                wait_temp.HPZL = dr_temp["hpzlid"].ToString() + "(" + dr_temp["hpzl"].ToString() + ")";
                                 wait_temp.FDJHM = dr_temp["fdjh"].ToString();
                                 wait_temp.PPXH = dr_temp["clpp"].ToString();
                                 wait_temp.VIN = dr_temp["clsbdh"].ToString();
-                                wait_temp.CLLX = dr_temp["cllx"].ToString() + dr_temp["cllxstr"].ToString();
+                                wait_temp.CLLX = dr_temp["cllx"].ToString() + "_" + dr_temp["cllxstr"].ToString();
                                 wait_temp.CZ = dr_temp["syr"].ToString();
                                 wait_temp.CD = dr_temp["cwkc"].ToString();
                                 wait_temp.KD = dr_temp["cwkk"].ToString();
@@ -684,6 +711,7 @@ namespace NetSendWaitCar
                                 wait_temp.HXKD = "0";
                                 wait_temp.HXGD = "0";
                                 wait_temp.LBGD = "0";
+                                wait_temp.ZS = "2";// dr_temp["axisnum"].ToString();
                                 wait_temp.ZJ1 = "0";
                                 wait_temp.ZJ2 = "0";
                                 wait_temp.ZJ3 = "0";
@@ -693,8 +721,8 @@ namespace NetSendWaitCar
                                 wait_temp.ZDZZL = dr_temp["zczl"].ToString() == "" ? "0" : dr_temp["zczl"].ToString();
 
                                 wait_temp.QYCHP = "";
-                                wait_temp.SFAZWB = "";
-                                wait_temp.WBZL = "";
+                                wait_temp.SFAZWB = dr_temp["sfazwb"].ToString() == "1" ? "Y" : "N";
+                                wait_temp.WBZL = dr_temp["wbzl"].ToString();
                                 wait_temp.SFAZQTBJ = "";
                                 wait_temp.QTBJZL = "";
                                 wait_temp.QTBJSM = "";
@@ -727,13 +755,13 @@ namespace NetSendWaitCar
                             DataRow dr_temp = dt_WaitCarList.Rows[i];
                             WaitCarModel wait_temp = new WaitCarModel();
                             wait_temp.WGJYH = dr_temp["jylsh"].ToString();
-                            wait_temp.JCCS = dr_temp["hphm"].ToString();
-                            wait_temp.CLPH = dr_temp["cph"].ToString();
+                            wait_temp.JCCS = dr_temp["jycs"].ToString();
+                            wait_temp.CLPH = dr_temp["hphm"].ToString();
                             wait_temp.JCLX = dr_temp["jylb"].ToString() == "00" ? "1" : "0";
                             wait_temp.HPYS = "";
                             wait_temp.HPZL = dr_temp["hpzl"].ToString();
                             wait_temp.FDJHM = dr_temp["fdjh"].ToString();
-                            wait_temp.PPXH = dr_temp["clpp"].ToString();
+                            wait_temp.PPXH = dr_temp["clpp"].ToString()+ dr_temp["clxh"].ToString();
                             wait_temp.VIN = dr_temp["clsbdh"].ToString();
                             wait_temp.CLLX = dr_temp["cllx"].ToString();
                             wait_temp.CZ = dr_temp["syr"].ToString();
@@ -838,7 +866,32 @@ namespace NetSendWaitCar
             }
 
             if (CreateWaitCarInfoFile())
+            {
+                lbZhuCheHPHM.Text = "-";
+                lbZhuCheHPZL.Text = "-";
+                ckLWH_z.Checked = false;
+                ckZJ_z.Checked = false;
+                ckLB_z.Checked = false;
+                ckHX_z.Checked = false;
+                ckZBZL_z.Checked = false;
+
+                lbGuaCheHPHM.Text = "-";
+                lbGuaCheHPZL.Text = "-";
+                ckLWH_g.Checked = false;
+                ckZJ_g.Checked = false;
+                ckLB_g.Checked = false;
+                ckHX_g.Checked = false;
+                ckZBZL_g.Checked = false;
+
+                ckQGLC.Checked = false;
+
+                waitCarInfoZhu = null;
+                waitCarInfoGua = null;
+
+                btSendWaitListCarToTest.Enabled = false;
+
                 MessageBox.Show("发车上线成功");
+            }
         }
 
         #region 联网待检列表刷新功能函数
@@ -852,6 +905,8 @@ namespace NetSendWaitCar
             {
                 if (wait_car_list != null && wait_car_list.Count > 0)
                 {
+                    dtDgvSource.Rows.Clear();
+
                     #region 更新待检列表显示
                     for (int i = 0; i < wait_car_list.Count; i++)
                     {
@@ -867,8 +922,8 @@ namespace NetSendWaitCar
                         dr_temp["宽"] = waicar.KD;
                         dr_temp["高"] = waicar.GD;
                         dr_temp["整备质量"] = waicar.ZBZL;
-                        dr_temp["轴距"] = waicar.ZJ1+"/"+ waicar.ZJ2 + "/" + waicar.ZJ3 + "/" + waicar.ZJ4;
-                        
+                        dr_temp["轴距"] = waicar.ZJ1 + "/" + waicar.ZJ2 + "/" + waicar.ZJ3 + "/" + waicar.ZJ4;
+
                         dtDgvSource.Rows.Add(dr_temp);
                     }
                     #endregion
@@ -876,7 +931,10 @@ namespace NetSendWaitCar
                     dgvWaitCarList.DataSource = dtDgvSource;
                 }
                 else
-                    dtDgvSource.Rows.Clear();
+                {
+                    if (dtDgvSource.Rows.Count > 0)
+                        dtDgvSource.Rows.Clear();
+                }
             }
             catch (Exception er)
             {
@@ -909,7 +967,10 @@ namespace NetSendWaitCar
 
             //发车上线
             if (CreateWaitCarInfoFile())
+            {
+                btSendSingleCarToTest.Enabled = false;
                 MessageBox.Show("发车上线成功");
+            }
         }
         
         /// <summary>
@@ -988,6 +1049,7 @@ namespace NetSendWaitCar
                         LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车长", waitCarInfoGua.CD, CarInfoPathTemp);
                         LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车宽", waitCarInfoGua.KD, CarInfoPathTemp);
                         LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车高", waitCarInfoGua.GD, CarInfoPathTemp);
+                        LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴数", waitCarInfoGua.ZS, CarInfoPathTemp);
                         LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距1", waitCarInfoGua.ZJ1, CarInfoPathTemp);
                         LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距2", waitCarInfoGua.ZJ2, CarInfoPathTemp);
                         LwhUploadOnline.IOControl.WritePrivateProfileString("检测信息", "挂车轴距3", waitCarInfoGua.ZJ3, CarInfoPathTemp);

@@ -157,7 +157,10 @@ namespace LwhUploadOnline
                 XmlElement xe102 = xmldoc.CreateElement("hphm");
                 xe102.InnerText = model.CLHP;
                 XmlElement xe103 = xmldoc.CreateElement("hpzl");
-                xe103.InnerText = model.HPZL;
+                if (model.HPZL.Contains("("))
+                    xe103.InnerText = model.HPZL.Split('(')[1].Split(')')[0];
+                else
+                    xe103.InnerText = model.HPZL;
                 XmlElement xe104 = xmldoc.CreateElement("clsbdh");
                 xe104.InnerText = model.VIN;
                 XmlElement xe105 = xmldoc.CreateElement("cwkc");
@@ -418,13 +421,9 @@ namespace LwhUploadOnline
                 xe104.InnerText = model.jycs;
                 XmlElement xe105 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (model.hpzl.Contains("("))
-                {
                     xe105.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe105.InnerText = model.hpzl;
-                }
                 XmlElement xe106 = xmldoc.CreateElement("hphm");//创建一个<Node>节点 
                 xe106.InnerText = XmlOperation.encodeUTF8(model.hphm);
                 XmlElement xe107 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
@@ -547,13 +546,9 @@ namespace LwhUploadOnline
                 xe102.InnerText = XmlOperation.encodeUTF8(model.hphm);
                 XmlElement xe103 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (model.hpzl.Contains("("))
-                {
                     xe103.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe103.InnerText = model.hpzl;
-                }
                 XmlElement xe104 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
                 xe104.InnerText = model.clsbdh;
                 XmlElement xe105 = xmldoc.CreateElement("gwxm");//创建一个<Node>节点 
@@ -617,24 +612,18 @@ namespace LwhUploadOnline
                 xe105.InnerText = XmlOperation.encodeUTF8(model.hphm);
                 XmlElement xe106 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (model.hpzl.Contains("("))
-                {
                     xe106.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe106.InnerText = model.hpzl;
-                }
+
                 XmlElement xe107 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
                 xe107.InnerText = model.clsbdh;
                 XmlElement xe108 = xmldoc.CreateElement("zp");//创建一个<Node>节点 
                 if (model.zp != "")
-                {
                     xe108.InnerText = XmlOperation.PushTxt(model.zp);
-                }
                 else
-                {
                     xe108.InnerText = "";
-                }
+
                 XmlElement xe109 = xmldoc.CreateElement("pssj");//创建一个<Node>节点 
                 xe109.InnerText = model.pssj;
                 XmlElement xe110 = xmldoc.CreateElement("jyxm");//创建一个<Node>节点 
@@ -698,13 +687,9 @@ namespace LwhUploadOnline
                 xe104.InnerText = model.jycs;
                 XmlElement xe105 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (model.hpzl.Contains("("))
-                {
                     xe105.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe105.InnerText = model.hpzl;
-                }
                 XmlElement xe106 = xmldoc.CreateElement("hphm");//创建一个<Node>节点 
                 xe106.InnerText = XmlOperation.encodeUTF8(model.hphm);
                 XmlElement xe107 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
@@ -922,7 +907,10 @@ namespace LwhUploadOnline
                 XmlElement xe102 = xmldoc.CreateElement("jclsh");//创建一个<Node>节点 
                 xe102.InnerText = model.jylsh;
                 XmlElement xe103 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
-                xe103.InnerText = model.hpzl;
+                if (model.hpzl.Contains("("))
+                    xe103.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
+                else
+                    xe103.InnerText = model.hpzl;
                 XmlElement xe104 = xmldoc.CreateElement("cllx");//创建一个<Node>节点 
                 xe104.InnerText = model.cllx.Split('_')[0];
                 XmlElement xe105 = xmldoc.CreateElement("hphm");//创建一个<Node>节点 
@@ -1039,13 +1027,10 @@ namespace LwhUploadOnline
                 xe104.InnerText = model.jycs;
                 XmlElement xe105 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (model.hpzl.Contains("("))
-                {
                     xe105.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe105.InnerText = model.hpzl;
-                }
+
                 XmlElement xe106 = xmldoc.CreateElement("hphm");//创建一个<Node>节点 
                 xe106.InnerText = XmlOperation.encodeUTF8(model.hphm);
                 XmlElement xe107 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
@@ -1114,13 +1099,10 @@ namespace LwhUploadOnline
                 xe103.InnerText = model.jcxdh;
                 XmlElement xe105 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (model.hpzl.Contains("("))
-                {
                     xe105.InnerText = model.hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe105.InnerText = model.hpzl;
-                }
+
                 XmlElement xe106 = xmldoc.CreateElement("hphm");//创建一个<Node>节点 
                 xe106.InnerText = XmlOperation.encodeUTF8(model.hphm);
                 XmlElement xe107 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
@@ -1192,13 +1174,10 @@ namespace LwhUploadOnline
                 xe102.InnerText = hphm;
                 XmlElement xe103 = xmldoc.CreateElement("hpzl");//创建一个<Node>节点 
                 if (hpzl.Contains("("))
-                {
                     xe103.InnerText = hpzl.Split('(')[1].Split(')')[0];
-                }
                 else
-                {
                     xe103.InnerText = hpzl;
-                }
+
                 XmlElement xe104 = xmldoc.CreateElement("clsbdh");//创建一个<Node>节点 
                 xe104.InnerText = clsbdh;
                 XmlElement xe105 = xmldoc.CreateElement("zplx");//创建一个<Node>节点 

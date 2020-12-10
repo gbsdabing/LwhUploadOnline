@@ -46,6 +46,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.pCarList = new System.Windows.Forms.Panel();
             this.dgvWaitCarList = new System.Windows.Forms.DataGridView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.单车发车上线ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.设为待检主车ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.设为待检挂车ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.刷新待检列表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ckQGLC = new System.Windows.Forms.CheckBox();
             this.label14 = new System.Windows.Forms.Label();
             this.ckHX_g = new System.Windows.Forms.CheckBox();
@@ -70,11 +75,6 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.btSendWaitListCarToTest = new System.Windows.Forms.Button();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.单车发车上线ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.设为待检主车ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.设为待检挂车ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.刷新待检列表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pCarSingle = new System.Windows.Forms.Panel();
             this.label28 = new System.Windows.Forms.Label();
             this.ckHX_s = new System.Windows.Forms.CheckBox();
@@ -325,15 +325,54 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.dgvWaitCarList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgvWaitCarList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvWaitCarList.ColumnHeadersVisible = false;
             this.dgvWaitCarList.ContextMenuStrip = this.contextMenuStrip1;
             this.dgvWaitCarList.Location = new System.Drawing.Point(1, 1);
             this.dgvWaitCarList.Name = "dgvWaitCarList";
             this.dgvWaitCarList.ReadOnly = true;
+            this.dgvWaitCarList.RowHeadersVisible = false;
             this.dgvWaitCarList.RowTemplate.Height = 27;
             this.dgvWaitCarList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvWaitCarList.Size = new System.Drawing.Size(405, 535);
             this.dgvWaitCarList.TabIndex = 53;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.单车发车上线ToolStripMenuItem,
+            this.设为待检主车ToolStripMenuItem,
+            this.设为待检挂车ToolStripMenuItem,
+            this.刷新待检列表ToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 100);
+            // 
+            // 单车发车上线ToolStripMenuItem
+            // 
+            this.单车发车上线ToolStripMenuItem.Name = "单车发车上线ToolStripMenuItem";
+            this.单车发车上线ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.单车发车上线ToolStripMenuItem.Text = "单车发车上线";
+            this.单车发车上线ToolStripMenuItem.Click += new System.EventHandler(this.单车发车上线ToolStripMenuItem_Click);
+            // 
+            // 设为待检主车ToolStripMenuItem
+            // 
+            this.设为待检主车ToolStripMenuItem.Name = "设为待检主车ToolStripMenuItem";
+            this.设为待检主车ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.设为待检主车ToolStripMenuItem.Text = "设为待检主车";
+            this.设为待检主车ToolStripMenuItem.Click += new System.EventHandler(this.设为待检主车ToolStripMenuItem_Click);
+            // 
+            // 设为待检挂车ToolStripMenuItem
+            // 
+            this.设为待检挂车ToolStripMenuItem.Name = "设为待检挂车ToolStripMenuItem";
+            this.设为待检挂车ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.设为待检挂车ToolStripMenuItem.Text = "设为待检挂车";
+            this.设为待检挂车ToolStripMenuItem.Click += new System.EventHandler(this.设为待检挂车ToolStripMenuItem_Click);
+            // 
+            // 刷新待检列表ToolStripMenuItem
+            // 
+            this.刷新待检列表ToolStripMenuItem.Name = "刷新待检列表ToolStripMenuItem";
+            this.刷新待检列表ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.刷新待检列表ToolStripMenuItem.Text = "刷新待检列表";
+            this.刷新待检列表ToolStripMenuItem.Click += new System.EventHandler(this.刷新待检列表ToolStripMenuItem_Click);
             // 
             // ckQGLC
             // 
@@ -585,6 +624,7 @@
             // 
             // btSendWaitListCarToTest
             // 
+            this.btSendWaitListCarToTest.Enabled = false;
             this.btSendWaitListCarToTest.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Bold);
             this.btSendWaitListCarToTest.Location = new System.Drawing.Point(418, 486);
             this.btSendWaitListCarToTest.Name = "btSendWaitListCarToTest";
@@ -593,45 +633,6 @@
             this.btSendWaitListCarToTest.Text = "发车上线检测";
             this.btSendWaitListCarToTest.UseVisualStyleBackColor = true;
             this.btSendWaitListCarToTest.Click += new System.EventHandler(this.btSendWaitListCarToTest_Click);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.单车发车上线ToolStripMenuItem,
-            this.设为待检主车ToolStripMenuItem,
-            this.设为待检挂车ToolStripMenuItem,
-            this.刷新待检列表ToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 100);
-            // 
-            // 单车发车上线ToolStripMenuItem
-            // 
-            this.单车发车上线ToolStripMenuItem.Name = "单车发车上线ToolStripMenuItem";
-            this.单车发车上线ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
-            this.单车发车上线ToolStripMenuItem.Text = "单车发车上线";
-            this.单车发车上线ToolStripMenuItem.Click += new System.EventHandler(this.单车发车上线ToolStripMenuItem_Click);
-            // 
-            // 设为待检主车ToolStripMenuItem
-            // 
-            this.设为待检主车ToolStripMenuItem.Name = "设为待检主车ToolStripMenuItem";
-            this.设为待检主车ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
-            this.设为待检主车ToolStripMenuItem.Text = "设为待检主车";
-            this.设为待检主车ToolStripMenuItem.Click += new System.EventHandler(this.设为待检主车ToolStripMenuItem_Click);
-            // 
-            // 设为待检挂车ToolStripMenuItem
-            // 
-            this.设为待检挂车ToolStripMenuItem.Name = "设为待检挂车ToolStripMenuItem";
-            this.设为待检挂车ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
-            this.设为待检挂车ToolStripMenuItem.Text = "设为待检挂车";
-            this.设为待检挂车ToolStripMenuItem.Click += new System.EventHandler(this.设为待检挂车ToolStripMenuItem_Click);
-            // 
-            // 刷新待检列表ToolStripMenuItem
-            // 
-            this.刷新待检列表ToolStripMenuItem.Name = "刷新待检列表ToolStripMenuItem";
-            this.刷新待检列表ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
-            this.刷新待检列表ToolStripMenuItem.Text = "刷新待检列表";
-            this.刷新待检列表ToolStripMenuItem.Click += new System.EventHandler(this.刷新待检列表ToolStripMenuItem_Click);
             // 
             // pCarSingle
             // 
@@ -742,6 +743,7 @@
             // 
             // btSendSingleCarToTest
             // 
+            this.btSendSingleCarToTest.Enabled = false;
             this.btSendSingleCarToTest.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Bold);
             this.btSendSingleCarToTest.Location = new System.Drawing.Point(414, 484);
             this.btSendSingleCarToTest.Name = "btSendSingleCarToTest";
@@ -976,11 +978,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(582, 656);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.pCarSingle);
             this.Controls.Add(this.pCarList);
+            this.Controls.Add(this.pCarSingle);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "FrmMain";
             this.Text = "SendCarToTest";
             this.Load += new System.EventHandler(this.FrmMain1_Load);

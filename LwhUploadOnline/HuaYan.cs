@@ -214,7 +214,7 @@ namespace LwhUploadOnline
             }
         }
 
-        public DataTable GetVehicleInf(string jylsh, string jccs, string jyxm, out string code, out string message)
+        public DataTable GetVehicleInf(string jylsh, string jccs, string jyxm,string pdyj, out string code, out string message)
         {
             code = "";
             message = "";
@@ -231,9 +231,12 @@ namespace LwhUploadOnline
                 xe3.InnerText = jccs;
                 XmlElement xe4 = xmldoc.CreateElement("jyxm");//创建一个<Node>节点 
                 xe4.InnerText = jyxm;
+                XmlElement xe5 = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                xe5.InnerText = pdyj;
                 xe1.AppendChild(xe2);
                 xe1.AppendChild(xe3);
                 xe1.AppendChild(xe4);
+                xe1.AppendChild(xe5);
                 root.AppendChild(xe1);
                 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -290,6 +293,8 @@ namespace LwhUploadOnline
                 xe110.InnerText = XmlOperation.encodeUTF8(model.kssj);
                 XmlElement xe111 = xmldoc.CreateElement("sflx");//创建一个<Node>节点 
                 xe111.InnerText = "1";
+                XmlElement xe112 = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                xe112.InnerText = model.pdyj;
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -301,6 +306,7 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe109);
                 xe1.AppendChild(xe110);
                 xe1.AppendChild(xe111);
+                xe1.AppendChild(xe112);
                 root.AppendChild(xe1);
                 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -359,6 +365,9 @@ namespace LwhUploadOnline
                 xe110.InnerText = XmlOperation.encodeUTF8(model.jssj);
                 XmlElement xe111 = xmldoc.CreateElement("sflx");//创建一个<Node>节点 
                 xe111.InnerText = "1";
+                XmlElement xe112 = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                xe112.InnerText = model.pdyj;
+
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -370,6 +379,7 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe109);
                 xe1.AppendChild(xe110);
                 xe1.AppendChild(xe111);
+                xe1.AppendChild(xe112);
                 root.AppendChild(xe1);
                 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -428,6 +438,8 @@ namespace LwhUploadOnline
                 xe110.InnerText = XmlOperation.encodeUTF8(model.kssj);
                 XmlElement xe111 = xmldoc.CreateElement("lxxm");//创建一个<Node>节点 
                 xe111.InnerText = model.lxxm;
+                XmlElement xe112 = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                xe112.InnerText = "1";
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -439,6 +451,7 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe109);
                 xe1.AppendChild(xe110);
                 xe1.AppendChild(xe111);
+                xe1.AppendChild(xe112);
                 root.AppendChild(xe1);
 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -497,6 +510,8 @@ namespace LwhUploadOnline
                 xe110.InnerText = XmlOperation.encodeUTF8(model.jssj);
                 XmlElement xe111 = xmldoc.CreateElement("lxxm");//创建一个<Node>节点 
                 xe111.InnerText = model.lxxm;
+                XmlElement xe112 = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                xe112.InnerText = "1";
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -508,6 +523,7 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe109);
                 xe1.AppendChild(xe110);
                 xe1.AppendChild(xe111);
+                xe1.AppendChild(xe112);
                 root.AppendChild(xe1);
 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -582,6 +598,99 @@ namespace LwhUploadOnline
                 xlbgd.InnerText = model.xlbgd;
                 XmlElement xlbgdpd = xmldoc.CreateElement("xlbgdpd");//创建一个<Node>节点 
                 xlbgdpd.InnerText = model.xlbgdpd;
+                XmlElement pdyj = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                pdyj.InnerText = model.xlbgdpd;
+
+
+                XmlElement xe115 = xmldoc.CreateElement("cwkcLimit");//创建一个<Node>节点 
+                xe115.InnerText = model.cwkcLimit;
+                XmlElement xe116 = xmldoc.CreateElement("cwkkLimit");//创建一个<Node>节点 
+                xe116.InnerText = model.clwkccpd;
+                XmlElement xe117 = xmldoc.CreateElement("cwkgLimit");//创建一个<Node>节点 
+                xe117.InnerText = model.cwkkLimit;
+                XmlElement xe118 = xmldoc.CreateElement("L_StdLimit1589");//创建一个<Node>节点 
+                xe118.InnerText = model.L_StdLimit1589;
+                XmlElement xe119 = xmldoc.CreateElement("W_StdLimit1589");//创建一个<Node>节点 
+                xe119.InnerText = model.W_StdLimit1589;
+                XmlElement xe120 = xmldoc.CreateElement("H_StdLimit1589");//创建一个<Node>节点 
+                xe120.InnerText = model.H_StdLimit1589;
+                XmlElement xe121 = xmldoc.CreateElement("sfxz");//创建一个<Node>节点 
+                //xe121.InnerText = model.sfxz;
+                XmlElement xe122 = xmldoc.CreateElement("scc");//创建一个<Node>节点 
+                // xe122.InnerText = model.scc;
+                XmlElement xe123 = xmldoc.CreateElement("sck");//创建一个<Node>节点 
+                //xe123.InnerText = model.sck;
+                XmlElement xe124 = xmldoc.CreateElement("scg");//创建一个<Node>节点 
+                //xe124.InnerText = model.scg;
+                XmlElement xe125 = xmldoc.CreateElement("scpj");//创建一个<Node>节点 
+                //xe125.InnerText = model.scpj;
+                XmlElement xe126 = xmldoc.CreateElement("ms");//创建一个<Node>节点 
+                //xe126.InnerText = model.ms;
+
+                string temp = model.Stdbfb;
+                XmlElement xe127 = xmldoc.CreateElement("Stdbfb");//创建一个<Node>节点 
+                XmlElement xe128 = xmldoc.CreateElement("Stdjdz");//创建一个<Node>节点 
+                if (temp != "" || temp.Contains("或"))
+                {
+                    xe127.InnerText = temp.Replace("±", "").Split('或')[1].Replace("%", "");
+                    xe128.InnerText = temp.Replace("±", "").Split('或')[0];
+                }
+                else
+                {
+                    xe127.InnerText = "2";
+                    xe128.InnerText = "100";
+                }
+                
+                XmlElement xe129 = xmldoc.CreateElement("Wkzj");//创建一个<Node>节点 
+                XmlElement xe130 = xmldoc.CreateElement("Zjpj");//创建一个<Node>节点 
+                XmlElement xe131 = xmldoc.CreateElement("Stdjdz_zj");//创建一个<Node>节点 
+                XmlElement xe132 = xmldoc.CreateElement("Stdbfb_zj");//创建一个<Node>节点 
+                XmlElement xe133 = xmldoc.CreateElement("cwzjLimit");//创建一个<Node>节点 
+                if (model.Wkzj.Length > 0 && model.Wkzj != "0")
+                {
+                    xe129.InnerText = model.Wkzj;
+                    xe130.InnerText = model.Zjpj == "不合格" ? "2" : "1";
+                    if (model.Stdjdz_zj != "" && model.Stdjdz_zj.Contains("或"))
+                    {
+                        xe131.InnerText = model.Stdjdz_zj.Replace("±", "").Split('或')[0];
+                        xe132.InnerText = model.Stdjdz_zj.Replace("±", "").Split('或')[1].Replace("%","");
+                    }
+                    else
+                    {
+                        xe131.InnerText = "100";
+                        xe132.InnerText = "2";
+                    }
+                    if (model.cwzjLimit.Length > 0 && model.cwzjLimit != "0")
+                    {
+                        int zjbzz = 0, jdwc = 0, xdwc = 0;
+                        zjbzz = int.Parse(model.cwzjLimit);
+                        jdwc = int.Parse(xe131.InnerText);
+                        xdwc = (int)(int.Parse(xe132.InnerText) * zjbzz * 0.02d);
+                        if (jdwc > xdwc)
+                            xe133.InnerText = (zjbzz - jdwc).ToString() + "-" + (zjbzz + jdwc).ToString();
+                        else
+                            xe133.InnerText = (zjbzz - xdwc).ToString() + "-" + (zjbzz + xdwc).ToString();
+                    }
+                    else
+                        xe133.InnerText = "";
+                }
+                else
+                {
+                    //xe129.InnerText = "";
+                    //xe130.InnerText = "";
+                    //xe131.InnerText = "";
+                    //xe132.InnerText = "";
+                    //xe133.InnerText = "";
+                }
+
+                XmlElement xe134 = xmldoc.CreateElement("xlb_StdLimit1589");//创建一个<Node>节点 
+                //xe134.InnerText = model.clwkccpd;
+                XmlElement xe135 = xmldoc.CreateElement("Stdjdz_xlb");//创建一个<Node>节点 
+                //xe135.InnerText = model.clwkccpd;
+                XmlElement xe136 = xmldoc.CreateElement("cwxlbLimit");//创建一个<Node>节点 
+                //xe136.InnerText = model.clwkccpd;
+
+
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -595,11 +704,37 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe112);
                 xe1.AppendChild(xe113);
                 xe1.AppendChild(xe114);
+
                 xe1.AppendChild(cdevl);
                 xe1.AppendChild(kdevl);
                 xe1.AppendChild(gdevl);
                 xe1.AppendChild(xlbgd);
                 xe1.AppendChild(xlbgdpd);
+                xe1.AppendChild(pdyj);
+
+                xe1.AppendChild(xe115);
+                xe1.AppendChild(xe116);
+                xe1.AppendChild(xe117);
+                xe1.AppendChild(xe118);
+                xe1.AppendChild(xe119);
+                xe1.AppendChild(xe120);
+                xe1.AppendChild(xe121);
+                xe1.AppendChild(xe122);
+                xe1.AppendChild(xe123);
+                xe1.AppendChild(xe124);
+                xe1.AppendChild(xe125);
+                xe1.AppendChild(xe126);
+                xe1.AppendChild(xe127);
+                xe1.AppendChild(xe128);
+                xe1.AppendChild(xe129);
+                xe1.AppendChild(xe130);
+                xe1.AppendChild(xe131);
+                xe1.AppendChild(xe132);
+                xe1.AppendChild(xe133);
+                xe1.AppendChild(xe134);
+                xe1.AppendChild(xe135);
+                xe1.AppendChild(xe136);
+
                 root.AppendChild(xe1);
                 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -732,6 +867,8 @@ namespace LwhUploadOnline
                 xe111.InnerText = model.zpzl;
                 XmlElement spdm = xmldoc.CreateElement("spdm");//创建一个<Node>节点 
                 spdm.InnerText = model.spdm;
+                XmlElement pdyj = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                pdyj.InnerText = "1";
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -744,6 +881,7 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe110);
                 xe1.AppendChild(xe111);
                 xe1.AppendChild(spdm);
+                xe1.AppendChild(pdyj);
                 root.AppendChild(xe1);
                 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -797,6 +935,8 @@ namespace LwhUploadOnline
                 xe110.InnerText = model.jyxm;
                 XmlElement xe111 = xmldoc.CreateElement("zpzl");//创建一个<Node>节点 
                 xe111.InnerText = model.zpzl;
+                XmlElement xe112 = xmldoc.CreateElement("pdyj");//创建一个<Node>节点 
+                xe112.InnerText = "1";
                 xe1.AppendChild(xe101);
                 xe1.AppendChild(xe102);
                 xe1.AppendChild(xe103);
@@ -808,6 +948,7 @@ namespace LwhUploadOnline
                 xe1.AppendChild(xe109);
                 xe1.AppendChild(xe110);
                 xe1.AppendChild(xe111);
+                xe1.AppendChild(xe112);
                 root.AppendChild(xe1);
 
                 string send_xml = XmlOperation.ConvertXmlToStringUTF8(xmldoc);
@@ -844,8 +985,9 @@ namespace LwhUploadOnline
         public string gwjysbbh;
         public string jyxm;
         public string kssj;
+        public string pdyj; 
 
-        public HyProjectStart(string jylsh, string jyjgbh, string jcxdh, string jycs, string hpzl, string hphm, string clsbdh, string gwjysbbh, string jyxm, string kssj)
+        public HyProjectStart(string jylsh, string jyjgbh, string jcxdh, string jycs, string hpzl, string hphm, string clsbdh, string gwjysbbh, string jyxm, string kssj,string pdyj)
         {
             this.jylsh = jylsh;
             this.jyjgbh = jyjgbh;
@@ -859,6 +1001,7 @@ namespace LwhUploadOnline
             this.gwjysbbh = gwjysbbh;
             this.jyxm = jyxm;
             this.kssj = kssj;
+            this.pdyj = pdyj;
         }
     }
 
@@ -877,7 +1020,9 @@ namespace LwhUploadOnline
         public string gwjysbbh;
         public string jyxm;
         public string jssj;
-        public HyProjectFinish(string jylsh, string jyjgbh, string jcxdh, string jycs, string hpzl, string hphm, string clsbdh, string gwjysbbh, string jyxm, string jssj)
+        public string pdyj;
+
+        public HyProjectFinish(string jylsh, string jyjgbh, string jcxdh, string jycs, string hpzl, string hphm, string clsbdh, string gwjysbbh, string jyxm, string jssj, string pdyj)
         {
             this.jylsh = jylsh;
             this.jyjgbh = jyjgbh;
@@ -891,6 +1036,7 @@ namespace LwhUploadOnline
             this.gwjysbbh = gwjysbbh;
             this.jyxm = jyxm;
             this.jssj = jssj;
+            this.pdyj = pdyj;
         }
     }
 
@@ -1057,9 +1203,34 @@ namespace LwhUploadOnline
         public string gdevl;
         public string xlbgd;
         public string xlbgdpd;
+
+        public string cwkcLimit;
+        public string cwkkLimit;
+        public string cwkgLimit;
+        public string L_StdLimit1589;
+        public string W_StdLimit1589;
+        public string H_StdLimit1589;
+        public string sfxz;
+        public string scc;
+        public string sck;
+        public string scg;
+        public string scpj;
+        public string ms;
+        public string Stdbfb;
+        public string Stdjdz;
+        public string Wkzj;
+        public string Zjpj;
+        public string Stdjdz_zj;
+        public string Stdbfb_zj;
+        public string cwzjLimit;
+        public string xlb_StdLimit1589;
+        public string Stdjdz_xlb;
+        public string cwxlbLimit;
+
         public HyTestDetailResult(string jylsh, string jyjgbh, string jcxdh, string jyxm, string jycs, string hpzl, string hphm, string clsbdh, string gwjysbbh, string cwkc,
-            string cwkk, string cwkg, string clwkccpd,
-            string cdevl, string kdevl, string gdevl, string xlbgd, string xlbgdpd)
+            string cwkk, string cwkg, string clwkccpd, string cdevl, string kdevl, string gdevl, string xlbgd, string xlbgdpd, string cwkcLimit, string cwkkLimit, 
+            string cwkgLimit, string L_StdLimit1589, string W_StdLimit1589, string H_StdLimit1589, string sfxz, string scc, string sck, string scg, string scpj, 
+            string ms, string Stdbfb, string Stdjdz, string Wkzj, string Zjpj, string Stdjdz_zj, string Stdbfb_zj, string cwzjLimit, string xlb_StdLimit1589, string Stdjdz_xlb, string cwxlbLimit)
         {
             this.jylsh = jylsh;
             this.jyjgbh = jyjgbh;
@@ -1081,6 +1252,29 @@ namespace LwhUploadOnline
             this.gdevl = gdevl;
             this.xlbgd = xlbgd;
             this.xlbgdpd = xlbgdpd;
+
+            this.cwkcLimit = cwkcLimit;
+            this.cwkkLimit = cwkkLimit;
+            this.cwkgLimit = cwkgLimit;
+            this.L_StdLimit1589 = L_StdLimit1589;
+            this.W_StdLimit1589 = W_StdLimit1589;
+            this.H_StdLimit1589 = H_StdLimit1589;
+            this.sfxz = sfxz;
+            this.scc = scc;
+            this.sck = sck;
+            this.scg = scg;
+            this.scpj = scpj;
+            this.ms = ms;
+            this.Stdbfb = Stdbfb;
+            this.Stdjdz = Stdjdz;
+            this.Wkzj = Wkzj;
+            this.Zjpj = Zjpj;
+            this.Stdjdz_zj = Stdjdz_zj;
+            this.Stdbfb_zj = Stdbfb_zj;
+            this.cwzjLimit = cwzjLimit;
+            this.xlb_StdLimit1589 = xlb_StdLimit1589;
+            this.Stdjdz_xlb = Stdjdz_xlb;
+            this.cwxlbLimit = cwxlbLimit;
         }
     }
 

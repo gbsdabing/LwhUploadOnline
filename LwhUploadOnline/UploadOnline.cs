@@ -253,7 +253,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "1");
                             hy_interface.writeProjectStart(projectstart_hy, out code, out message);
 
                             //再发录像开始  
@@ -844,7 +844,8 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.WKDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
+                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.WKDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "",
+                                result.lengthMax+"-"+result.lengthMin, result.widthMax + "-" + result.widthMin,result.heightMax + "-" + result.heightMin, result.MAXLENGTH.ToString(), result.MAXWIDTH.ToString(), result.MAXHEIGHT.ToString(), "0","","","","","",result.LENGTHXZ, result.LENGTHXZ,result.ZZJCLZ.ToString(), result.ZZJPD,result.ZJXZ, result.ZJXZ,result.ZZJBZZ.ToString(), "","","");
                             if (hy_interface.writetestDetailResult(result_hy, out code, out message) && code == "1")
                                 message = "外廓检测结果发送成功";
                             else
@@ -1006,7 +1007,7 @@ namespace LwhUploadOnline
                             hy_interface.writeVideoStop(hyvideostop, out code_temp, out msg_temp);
 
                             //再发项目结束                           
-                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.WkDeviceID, softConfig.WKDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "1");
                             hy_interface.writeProjectFinish(hyprojectfinish, out code, out message);
 
                             if (code == "1" && code_temp == "1")
@@ -1176,7 +1177,7 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectStart projectstart_hy = new HyProjectStart(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "1");
                             hy_interface.writeProjectStart(projectstart_hy, out code, out message);
 
                             //再发录像开始  
@@ -1703,7 +1704,9 @@ namespace LwhUploadOnline
                             break;
                         case NetUploadModel.华燕:
                             #region hy
-                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.ZBZLDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.ZbzlDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
+                            //HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.ZBZLDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.ZbzlDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "");
+                            HyTestDetailResult result_hy = new HyTestDetailResult(result.LSH, softConfig.StationID, softConfig.LineID, softConfig.WKDH, result.JCCS, result.HPZL, result.CLHP, result.VIN, softConfig.WkDeviceID, result.LENGTHCLZ.ToString(), result.WIDTHCLZ.ToString(), result.HEIGHTCLZ.ToString(), (result.LENGTHPD == "合格" && result.WIDTHPD == "合格" && result.HEIGHTPD == "合格") ? "1" : "2", result.LENGTHPD == "合格" ? "1" : "2", result.WIDTHPD == "合格" ? "1" : "2", result.HEIGHTPD == "合格" ? "1" : "2", "", "",
+                                result.lengthMax + "-" + result.lengthMin, result.widthMax + "-" + result.widthMin, result.heightMax + "-" + result.heightMin, result.MAXLENGTH.ToString(), result.MAXWIDTH.ToString(), result.MAXHEIGHT.ToString(), "0", "", "", "", "", "", result.LENGTHXZ, result.LENGTHXZ, result.ZZJCLZ.ToString(), result.ZZJPD, result.ZJXZ, result.ZJXZ, result.ZZJBZZ.ToString(), "", "", "");
                             if (hy_interface.writetestDetailResult(result_hy, out code, out message) && code == "1")
                                 message = "整备质量检测结果发送成功";
                             else
@@ -1865,7 +1868,7 @@ namespace LwhUploadOnline
                             hy_interface.writeVideoStop(hyvideostop, out code_temp, out msg_temp);
 
                             //再发项目结束                           
-                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            HyProjectFinish hyprojectfinish = new HyProjectFinish(model.LSH, softConfig.StationID, softConfig.LineID, model.JCCS, model.HPZL, model.CLHP, model.VIN, softConfig.ZbzlDeviceID, softConfig.ZBZLDH, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "1");
                             hy_interface.writeProjectFinish(hyprojectfinish, out code, out message);
 
                             if (code == "1" && code_temp == "1")
